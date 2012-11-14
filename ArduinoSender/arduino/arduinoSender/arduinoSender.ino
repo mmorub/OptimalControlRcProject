@@ -1,6 +1,5 @@
 const int input_pin= 7;
 const int output_pin= 8; 
-const char* interrupt_frequency= "100"; // kHz
 
 /**
  * Defines steering signal data.
@@ -46,27 +45,16 @@ unsigned int signal_counter= 0;
 
 void setup(){
 
+  // setup input and output pins
   pinMode(input_pin, INPUT);
   pinMode(output_pin, OUTPUT); 
+  digitalWrite(output_pin, 1); // default is high
+  
+  // setup serial interface 
   Serial.begin(9600); 
 
-  if(interrupt_frequency== "8"){
-    setup_interrupt_8kHz(); 
-  } 
-  else if(interrupt_frequency== "80"){
-    setup_interrupt_80kHz();
-  } 
-  else if(interrupt_frequency== "100"){
-    setup_interrupt_100kHz(); 
-  } 
-  else if(interrupt_frequency== "125"){
-    setup_interrupt_125kHz(); 
-  } 
-  else {
-    Serial.println("FAILED TO SET INTERRUPT FREQUENCY");
-  }
-
-  Serial.println("starting over"); 
+  // setup interrupt, interrupt handler is used to construct reliable PPM signal 
+  setup_interrupt2_100kHz(); 
 }
 
 inline void set_channel_one(int signal){
@@ -225,7 +213,7 @@ void setup_interrupt_125kHz(){
 /**
  * Set timer 2 for interrupts at 100kHz.  
  */
-void setup_interrupt_100kHz(){
+void setup_interrupt2_100kHz(){
   cli(); // stop interrupts
 
   TCCR2A = 0; // set TCCR2A register to 0
