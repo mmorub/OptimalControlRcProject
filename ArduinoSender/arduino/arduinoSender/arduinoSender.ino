@@ -1,10 +1,20 @@
-const int input_pin= 7;
-const int output_pin= 8; 
+/**
+***********************************************************************************
+*
+* Code reads bytes from serial port and sends signal that corresponds to these
+* bytes to the rc toy car sending unit (RF901SM); use this code with 
+* ./tests/loop_steering_angle.c to test the connection.
+*
+***********************************************************************************
+*/
 
 /**
- * Defines steering signal data.
+ * Define steering signal data;
+ * signal is composed of low signals separated by 30 microsend high signals;
+ * duration of low signal determines value of the respective channel;
+ * signal of this type is referred to as "PPM signal".
  */
-const int length_steering_signal= 6;
+const int length_steering_signal= 6; // length in bytes
 long int steering_signal_data[6]= {
   30,    // index 0, duration of first high that announces channel 1 signal  
   120,   // index 1, duration of channel 1 signal (steering wheel)
@@ -18,9 +28,12 @@ const int lower_bound_channel_two= 110;
 const int upper_bound_channel_two= 130; 
 
 /**
- * Defines binding signal data; sent at start-up to bind 2.4GHz sender (Kopropo RF-901SM) to car.
+ * Define binding signal data; 
+ * binding signal is sent at start-up to bind 2.4GHz sender (Kopropo RF-901SM) 
+ * to toy rc car;
+ * this signal is for mini-z Porsche 906.
  */
-const int length_binding_signal= 65; 
+const int length_binding_signal= 65; // length in bytes
 const long int binding_signal_data[length_binding_signal]= { 
   0, 67183,                    // indices to these data: 0, 1 
   57, 30, 1555,                //  2.. 4
@@ -35,6 +48,8 @@ const long int binding_signal_data[length_binding_signal]= {
   30, 120, 30, 120, 30, 1220,  
   30, 120, 30, 120, 30, 1220}; // 59..64
 
+const int input_pin= 7;  // arduino detects 12V power source to be on with pin 7
+const int output_pin= 8; // arduino sends PPM signal through pin 8
 boolean sender_switched_on= 0; 
 boolean binding_initiated= 0; 
 boolean send_steering_signal= 0;
@@ -43,6 +58,9 @@ boolean next_signal= 0;
 unsigned long int interrupt_counter= 0;
 unsigned int signal_counter= 0; 
 
+/**
+ * Sets up arduino at upload of code.
+ */
 void setup(){
 
   // setup input and output pins
@@ -57,23 +75,43 @@ void setup(){
   setup_interrupt2_100kHz(); 
 }
 
+/**
+ * Sets channel one of the PPM signal; 
+ * used for convenience and easier reading only.
+ */
 inline void set_channel_one(int signal){
   steering_signal_data[1]= signal;
 }
 
+/**
+ * Returns current value of channel one of the PPM signal; 
+ * used for conveniece and easier reading only. 
+ */
 inline int get_channel_one(){
   return steering_signal_data[1];
 }
 
+/**
+ * Loop is carried out periodically as long as arduino is powered 
+ * (approximately at 600Hz, but without any real time realiability).
+ */
 void loop(){
-/* 
- * debugging: send four bits that control interrupt handler to screen
- *
-  send_steering_signal ? Serial.print("1") : Serial.print("0");
-  send_binding_signal ? Serial.print(" 1") : Serial.print(" 0");
-  binding_initiated ? Serial.print(" 1") : Serial.print(" 0");
-  sender_switched_on ? Serial.println(" 1") : Serial.println(" 0");
-*/
+ 
+ // If a byte is available at the serial port, interpret it to be 
+ // the requested channel one value.
+ if (Serial.available()> 0) {
+    int usersInteger= Serial.read();
+    Serial.print("user requested duration= ");
+    Serial.println(usersInteger, DEC); 
+
+    // Accept byte from serial port only if its value is within bounds
+    // specified by the user. 
+    if(usersInteger<= upper_bound_channel_one && usersInteger>= lower_bound_channel_one){
+      send_steering_signal= 0; // tell interrupt handler ISR() not to send signals before changing signals 
+      steering_signal_data[1]= usersInteger;
+      send_steering_signal= 1; // tell interrupt handler ISR() it may send again
+    } 
+  }
 
 /**
  * debugging: send periodic signal to steering wheel
@@ -95,28 +133,23 @@ void loop(){
   }
   delay(20);
  */
- 
- if (Serial.available()> 0) {
-    int usersInteger= Serial.read();
-    Serial.print("user requested duration= ");
-    Serial.println(usersInteger, DEC); 
-
-    if(usersInteger<= upper_bound_channel_one && usersInteger>= lower_bound_channel_one){
-      send_steering_signal= 0; 
-      steering_signal_data[1]= usersInteger;
-      send_steering_signal= 1; 
-    } 
-  }
 
 }
 
 /**
- * If-else construction is designed to 
- * - decide with highest priority whether steering signal is to be sent (one boolean comparison required)
- * - decide with second highest priority whether binding signal is to be sent (two comparisons required)
- * - put low priority on waiting for sender to be switched on for the first time (three comparisons required)
+ * Interrupt hander for timer 2 carries out one of three tasks (or does nothing):
+ * step 1: wait for 12V power supply to be switched on (look for if(!sender_switched_on))
+ * step 2: send binding signal (look for if(send_binding_signal))
+ * step 3: send current PPM signal that determines steering wheel and throttle of toy rc car
+ * (look for if(send_steering_signal)).
  */
 ISR(TIMER2_COMPA_vect){
+ /**
+  * If-else construction is designed to 
+  * - decide with highest priority whether steering signal is to be sent (one boolean comparison required)
+  * - decide with second highest priority whether binding signal is to be sent (two comparisons required)
+  * - put low priority on waiting for sender to be switched on for the first time (three comparisons required)
+  */
   if(send_steering_signal){
     adjust_steering_signal(); 
   } 
@@ -144,6 +177,10 @@ ISR(TIMER2_COMPA_vect){
 
 }
 
+/**
+ * Adjusts binding signal as a function of time, where time is measured
+ * by counting interrupts.
+ */
 inline void adjust_binding_signal(){
   
   // toggle output signal if it is time for next rising or falling edge
@@ -166,6 +203,10 @@ inline void adjust_binding_signal(){
   } 
 }
 
+/**
+ * Adjusts steering signal as a function of time, where time is measured
+ * by counting interrupts.
+ */
 inline void adjust_steering_signal(){
   
   // toggle output signal if it is time for next rising or falling edge
