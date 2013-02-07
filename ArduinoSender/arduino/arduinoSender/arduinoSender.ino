@@ -15,7 +15,7 @@
  * signal of this type is referred to as "PPM signal".
  */
 const int length_steering_signal= 6; // length in bytes
-long int steering_signal_data[6]= {
+volatile long int steering_signal_data[6]= {
   30,    // index 0, duration of first high that announces channel 1 signal  
   120,   // index 1, duration of channel 1 signal (steering wheel)
   30,    // index 2, announces channel 2 signal
@@ -51,9 +51,9 @@ const long int binding_signal_data[length_binding_signal]= {
 const int input_pin= 7;  // arduino detects 12V power source to be on with pin 7
 const int output_pin= 8; // arduino sends PPM signal through pin 8
 boolean sender_switched_on= 0; 
-boolean binding_initiated= 0; 
-boolean send_steering_signal= 0;
-boolean send_binding_signal= 0; 
+volatile boolean binding_initiated= 0; 
+volatile boolean send_steering_signal= 0;
+volatile boolean send_binding_signal= 0; 
 boolean next_signal= 0; 
 unsigned long int interrupt_counter= 0;
 unsigned int signal_counter= 0; 
@@ -67,6 +67,9 @@ void setup(){
   pinMode(input_pin, INPUT);
   pinMode(output_pin, OUTPUT); 
   digitalWrite(output_pin, 1); // default is high
+
+  // when serial port is initiated by the control program, arduino resets, so wait for a few seconds
+  delay(2000);
   
   // setup serial interface 
   Serial.begin(9600); 
@@ -93,7 +96,7 @@ inline int get_channel_one(){
 
 /**
  * Loop is carried out periodically as long as arduino is powered 
- * (approximately at 600Hz, but without any real time realiability).
+ * (approximately at 600Hz, but without any real time reliability).
  */
 void loop(){
  
@@ -101,15 +104,18 @@ void loop(){
  // the requested channel one value.
  if (Serial.available()> 0) {
     int usersInteger= Serial.read();
-    Serial.print("user requested duration= ");
-    Serial.println(usersInteger, DEC); 
+    // Uncomment the following 2 lines for debugging
+    //Serial.print("user requested duration= ");
+    //Serial.println(usersInteger, DEC); 
 
     // Accept byte from serial port only if its value is within bounds
     // specified by the user. 
     if(usersInteger<= upper_bound_channel_one && usersInteger>= lower_bound_channel_one){
+      cli(); // disable interrupts while writing to steering_signal_data[]
       send_steering_signal= 0; // tell interrupt handler ISR() not to send signals before changing signals 
       steering_signal_data[1]= usersInteger;
       send_steering_signal= 1; // tell interrupt handler ISR() it may send again
+      sei(); // enable interrupts
     } 
   }
 
@@ -210,7 +216,7 @@ inline void adjust_binding_signal(){
 inline void adjust_steering_signal(){
   
   // toggle output signal if it is time for next rising or falling edge
-  if(interrupt_counter== steering_signal_data[signal_counter]){ // check if it is time for next edge
+  if(interrupt_counter >= steering_signal_data[signal_counter]){ // check if it is time for next edge
     digitalWrite(output_pin, next_signal); 
     signal_counter++; 
     interrupt_counter= 0; // reset to start counting to next toggle time
