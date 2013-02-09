@@ -13,6 +13,12 @@
  * signal is composed of low signals separated by 30 microsend high signals;
  * duration of low signal determines value of the respective channel;
  * signal of this type is referred to as "PPM signal".
+ *
+ * Note last value, i.e. time to be filled before next PPM signal starts,
+ * is about 450 microseconds for Kopropo EX-1 Mars gun set for two channels.
+ * For last entry= 670 a total duration of 1000 microseconds, i.e. 100Hz, results
+ * for the 2-channel PPM signal. This is twice as fast as the typical 
+ * 50Hz of toy rc controls.  
  */
 const int length_steering_signal= 6; // length in bytes
 volatile long int steering_signal_data[6]= {
@@ -21,9 +27,14 @@ volatile long int steering_signal_data[6]= {
   30,    // index 2, announces channel 2 signal
   120,   // index 3, channel 2 signal (throttle/brake)
   30,    // index 4, announces channel 3 signal/marks end of channel 2 signal 
-  1220}; // index 6, time to be filled before next PPM signal starts 
-const int lower_bound_channel_one= 100; // lower bound on signal length
-const int upper_bound_channel_one= 125; 
+  670};  // index 5, time to be filled before next PPM signal starts
+ 
+/**
+ * Following lower and upper bounds for channel durations need to be adjusted for each model 
+ * by trial and error.
+ */
+const int lower_bound_channel_one= 105; // lower bound on signal length
+const int upper_bound_channel_one= 135; 
 const int lower_bound_channel_two= 110; 
 const int upper_bound_channel_two= 130; 
 
@@ -38,12 +49,16 @@ unsigned long int interrupt_counter= 0;
 unsigned int signal_counter= 0; 
 
 /**
+ * used for debugging only
+ */
+int step= 1; 
+
+/**
  * Sets up arduino at upload of code.
  */
 void setup(){
 
   // setup input and output pins
-  pinMode(input_pin, INPUT);
   pinMode(output_pin, OUTPUT); 
   digitalWrite(output_pin, 1); // default is high
 
@@ -78,7 +93,8 @@ inline int get_channel_one(){
  * (approximately at 600Hz, but without any real time reliability).
  */
 void loop(){
- 
+
+  /**
  // If a byte is available at the serial port, interpret it to be 
  // the requested channel one value.
  if (Serial.available()> 0) {
@@ -95,27 +111,28 @@ void loop(){
       sei(); // enable interrupts
     } 
   }
+  */
 
 /**
  * debugging: send periodic signal to steering wheel
- *
-  int step= 1; 
-  if (send_steering_signal) {
-      send_steering_signal= 0; 
-      steering_signal_data[1]+= step;
-      send_steering_signal= 1; 
-    if(steering_signal_data[1]> upper_bound_channel_one){
-      step= -1;
-      delay(2000);
-    } 
-    else if(steering_signal_data[1]< lower_bound_channel_one){
-      step= 1; 
-      delay(2000); 
-    }
-    Serial.println(steering_signal_data[1]); 
-  }
-  delay(20);
  */
+  cli(); // disable interrupts while writing to steering_signal_data
+  steering_signal_data[1]+= step;
+  sei(); // enable interrupts
+  
+  // switch step to -1 if upper bound is reached
+  // switch step to  1 if lower bound is reached
+  if(steering_signal_data[1]> upper_bound_channel_one){
+    step= -1;
+    delay(2000);
+  } 
+  else if(steering_signal_data[1]< lower_bound_channel_one){
+    step= 1; 
+    delay(2000); 
+  }
+  Serial.println(steering_signal_data[1]); 
+  
+  delay(20);
 
 }
 
