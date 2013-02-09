@@ -3,6 +3,6 @@
 # in this directory and its subdirectories by issuing command "make clean".
 #
 all:
-	make -C ArduinoSender/Makefile all
+	make -C ArduinoSender all
 clean:
-	make -C ArduinoSender/Makefile clean
+	make -C ArduinoSender clean
