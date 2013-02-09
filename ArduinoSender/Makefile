@@ -3,10 +3,10 @@
 # in this directory and its subdirectories by issuing command "make clean".
 #
 all:
-	make -C C/Makefile all
-	make -C tests/Makefile all
+	make -C C all
+	make -C tests all
 
 clean:
-	make -C C/Makefile clean
-	make -C tests/Makefile clean
+	make -C C clean
+	make -C tests clean
 
