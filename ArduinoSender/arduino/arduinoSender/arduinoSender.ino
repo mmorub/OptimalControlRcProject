@@ -28,32 +28,11 @@ const int lower_bound_channel_two= 110;
 const int upper_bound_channel_two= 130; 
 
 /**
- * Define binding signal data; 
- * binding signal is sent at start-up to bind 2.4GHz sender (Kopropo RF-901SM) 
- * to toy rc car;
- * this signal is for mini-z Porsche 906.
+ * pins and boolean variables
  */
-const int length_binding_signal= 65; // length in bytes
-const long int binding_signal_data[length_binding_signal]= { 
-  0, 67183,                    // indices to these data: 0, 1 
-  57, 30, 1555,                //  2.. 4
-  30, 120, 30, 120, 30, 1164,  //  5..10 
-  30, 120, 30, 120, 30, 1220,  
-  30, 120, 30, 120, 30, 1220,  
-  30, 120, 30, 120, 30, 1220,  
-  30, 120, 30, 120, 30, 1220,  
-  30, 120, 30, 120, 30, 1220,  
-  30, 120, 30, 120, 30, 1220,  
-  30, 120, 30, 120, 30, 1220,  
-  30, 120, 30, 120, 30, 1220,  
-  30, 120, 30, 120, 30, 1220}; // 59..64
-
 const int input_pin= 7;  // arduino detects 12V power source to be on with pin 7
 const int output_pin= 8; // arduino sends PPM signal through pin 8
 boolean sender_switched_on= 0; 
-volatile boolean binding_initiated= 0; 
-volatile boolean send_steering_signal= 0;
-volatile boolean send_binding_signal= 0; 
 boolean next_signal= 0; 
 unsigned long int interrupt_counter= 0;
 unsigned int signal_counter= 0; 
@@ -112,9 +91,7 @@ void loop(){
     // specified by the user. 
     if(usersInteger<= upper_bound_channel_one && usersInteger>= lower_bound_channel_one){
       cli(); // disable interrupts while writing to steering_signal_data[]
-      send_steering_signal= 0; // tell interrupt handler ISR() not to send signals before changing signals 
       steering_signal_data[1]= usersInteger;
-      send_steering_signal= 1; // tell interrupt handler ISR() it may send again
       sei(); // enable interrupts
     } 
   }
@@ -143,71 +120,16 @@ void loop(){
 }
 
 /**
- * Interrupt hander for timer 2 carries out one of three tasks (or does nothing):
+ * Interrupt handler for timer 2 carries out one of three tasks (or does nothing):
  * step 1: wait for 12V power supply to be switched on (look for if(!sender_switched_on))
  * step 2: send binding signal (look for if(send_binding_signal))
  * step 3: send current PPM signal that determines steering wheel and throttle of toy rc car
  * (look for if(send_steering_signal)).
  */
 ISR(TIMER2_COMPA_vect){
- /**
-  * If-else construction is designed to 
-  * - decide with highest priority whether steering signal is to be sent (one boolean comparison required)
-  * - decide with second highest priority whether binding signal is to be sent (two comparisons required)
-  * - put low priority on waiting for sender to be switched on for the first time (three comparisons required)
-  */
-  if(send_steering_signal){
-    adjust_steering_signal(); 
-  } 
-  else if(send_binding_signal){ // equiv. to !send_steering_signal && send_binding_signal
-    // carry on binding
-    adjust_binding_signal(); 
-  }
-  else {                        // equiv. to !send_steering_signal && !send_binding_signal 
-  
-    // do nothing if binding has been finished
-    // otherwise, wait for sender to be switched on and trigger binding 
-    if(!binding_initiated){     // equiv. to !send_steering_signal && !send_binding_signal && !binding_initiated   
-    
-      // wait for sender to be switched on for the first time
-      if(!sender_switched_on){  // equiv. to !send_steering_signal && !send_binding_signal && !binding_initiated && !sender_switched on
-        sender_switched_on= digitalRead(input_pin);  // check if sender has been switched on
-      } else {
-        send_binding_signal= 1;
-        binding_initiated= 1;  
-      }
-    } else {                    // equiv. to !send_steering_signal && !send_binding_signal && sender_switched_on 
-      // do nothing, this case is reached if binding has been completed and loop() sets send_binding_signal to false
-    }
-  }
-
+  adjust_steering_signal(); 
 }
 
-/**
- * Adjusts binding signal as a function of time, where time is measured
- * by counting interrupts.
- */
-inline void adjust_binding_signal(){
-  
-  // toggle output signal if it is time for next rising or falling edge
-  if(interrupt_counter== binding_signal_data[signal_counter]){ // check if it is time for next edge
-    digitalWrite(output_pin, next_signal); 
-    signal_counter++; 
-    interrupt_counter= 0; // reset to start counting to next toggle time
-    next_signal= !next_signal; // toggle signal for next use
-  } else {
-    interrupt_counter++; 
-  }
-  
-  // check if binding signal has been completed
-  // if so, switch from binding to steering
-  if(signal_counter== length_binding_signal) {
-    send_steering_signal= 1;
-    send_binding_signal= 0;
-    signal_counter= 0;
-    interrupt_counter= 0; 
-  } 
-}
 
 /**
  * Adjusts steering signal as a function of time, where time is measured
