@@ -26,19 +26,21 @@ int main(int argc, char *argv[])
     const int baudrate = B9600;  
     int rc; 
     uint8_t current_signal= 120;
-    const uint8_t lower_bound_signal= 100;
-    const uint8_t upper_bound_signal= 125;
+    const uint8_t lower_bound_signal= 105;
+    const uint8_t upper_bound_signal= 135;
     uint8_t delta_signal= 1; 
     fd = serialport_init(serialport, baudrate);
     while (1){
       rc = serialport_writebyte(fd, current_signal);
       if(rc==-1) return -1;
-      usleep(100000); // sleep 1/10 s
+      usleep(20000); // sleep 1/10 s
       
-      if (current_signal>= 125){
+      if (current_signal>= upper_bound_signal){
 	delta_signal= -1;
-      } else if (current_signal<= 100){
+	usleep(2000000);
+      } else if (current_signal<= lower_bound_signal){
 	delta_signal= 1;
+	usleep(2000000); 
       }
       current_signal += delta_signal;  
     }
