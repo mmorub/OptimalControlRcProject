@@ -94,7 +94,6 @@ inline int get_channel_one(){
  */
 void loop(){
 
-  /**
  // If a byte is available at the serial port, interpret it to be 
  // the requested channel one value.
  if (Serial.available()> 0) {
@@ -111,11 +110,10 @@ void loop(){
       sei(); // enable interrupts
     } 
   }
-  */
 
 /**
  * debugging: send periodic signal to steering wheel
- */
+ *
   cli(); // disable interrupts while writing to steering_signal_data
   steering_signal_data[1]+= step;
   sei(); // enable interrupts
@@ -133,7 +131,7 @@ void loop(){
   Serial.println(steering_signal_data[1]); 
   
   delay(20);
-
+*/
 }
 
 /**
@@ -166,7 +164,7 @@ inline void adjust_steering_signal(){
   
   // check if steering signal has been completed
   // if so, start over
-  if(signal_counter== length_steering_signal) {
+  if(signal_counter>= length_steering_signal) {
     signal_counter= 0;
     interrupt_counter= 0; 
   } 
