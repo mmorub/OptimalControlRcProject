@@ -9,6 +9,15 @@
 */
 
 /**
+ * Defines for better readability 
+ */
+ 
+ #define STEERING 1
+ #define THROTTLE 3
+ #define OFFSET_STEERING 100
+ #define OFFSET_THROTTLE 90
+ 
+ /**
  * Define steering signal data;
  * signal is composed of low signals separated by 30 microsend high signals;
  * duration of low signal determines value of the respective channel;
@@ -23,20 +32,20 @@
 const int length_steering_signal= 6; // length in bytes
 volatile long int steering_signal_data[6]= {
   30,    // index 0, duration of first high that announces channel 1 signal  
-  120,   // index 1, duration of channel 1 signal (steering wheel)
+  115,   // index 1, duration of channel 1 signal (steering wheel)
   30,    // index 2, announces channel 2 signal
   120,   // index 3, channel 2 signal (throttle/brake)
   30,    // index 4, announces channel 3 signal/marks end of channel 2 signal 
-  670};  // index 5, time to be filled before next PPM signal starts
+  675};  // index 5, time to be filled before next PPM signal starts
  
 /**
  * Following lower and upper bounds for channel durations need to be adjusted for each model 
  * by trial and error.
  */
-const int lower_bound_channel_one= 105; // lower bound on signal length
-const int upper_bound_channel_one= 135; 
-const int lower_bound_channel_two= 110; 
-const int upper_bound_channel_two= 130; 
+const int lower_bound_channel_one= 0; // lower bound on signal length (steering)
+const int upper_bound_channel_one= 30; 
+const int lower_bound_channel_two= 0; //  "        "                  (throttle)
+const int upper_bound_channel_two= 60; 
 
 /**
  * pins and boolean variables
@@ -52,6 +61,7 @@ unsigned int signal_counter= 0;
  * used for debugging only
  */
 int step= 1; 
+const int debug_pin= 12;
 
 /**
  * Sets up arduino at upload of code.
@@ -60,7 +70,10 @@ void setup(){
 
   // setup input and output pins
   pinMode(output_pin, OUTPUT); 
+  pinMode(debug_pin, OUTPUT);
+  
   digitalWrite(output_pin, 1); // default is high
+  digitalWrite(debug_pin, 1);
 
   // when serial port is initiated by the control program, arduino resets, so wait for a few seconds
   delay(2000);
@@ -98,18 +111,34 @@ void loop(){
  // the requested channel one value.
  if (Serial.available()> 0) {
     int usersInteger= Serial.read();
+    
+    // check if MFB is set => yes => steering signal; else throttle signal
+    if (usersInteger & 0b10000000) {    // steering
+        usersInteger &= ~(1 << 7);    //set MSB to 0 again
+        // Accept byte from serial port only if its value is within bounds
+        // specified by the user. 
+        if(usersInteger<= upper_bound_channel_one && usersInteger>= lower_bound_channel_one){
+            //digitalWrite(debug_pin, 0);
+            cli(); // disable interrupts while writing to steering_signal_data[]
+            steering_signal_data[STEERING] = usersInteger + OFFSET_STEERING;
+            // Serial.println(usersInteger, DEC); 
+            sei(); // enable interrupts
+        }
+    }
+    else {          // throttle
+        if(usersInteger<= upper_bound_channel_two && usersInteger>= lower_bound_channel_two){
+            //digitalWrite(debug_pin, 1);
+            cli(); 
+            steering_signal_data[THROTTLE] = usersInteger + OFFSET_THROTTLE;
+            // Serial.println(usersInteger, DEC); 
+            sei(); 
+        }
+    }
+    
     // Uncomment the following 2 lines for debugging
     //Serial.print("user requested duration= ");
     //Serial.println(usersInteger, DEC); 
-
-    // Accept byte from serial port only if its value is within bounds
-    // specified by the user. 
-    if(usersInteger<= upper_bound_channel_one && usersInteger>= lower_bound_channel_one){
-      cli(); // disable interrupts while writing to steering_signal_data[]
-      steering_signal_data[1]= usersInteger;
-      sei(); // enable interrupts
-    } 
-  }
+}
 
 /**
  * debugging: send periodic signal to steering wheel
