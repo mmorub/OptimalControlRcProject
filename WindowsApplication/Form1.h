@@ -4,7 +4,7 @@
 #include <PID_Controller.h>
 
 namespace RC_Cars {
-	
+
 	using namespace System;
 	using namespace System::ComponentModel;
 	using namespace System::Collections;
@@ -55,6 +55,14 @@ namespace RC_Cars {
 	private: System::Windows::Forms::Panel^  panel2;
 	private: System::Windows::Forms::Label^  label5;
 	private: System::Windows::Forms::Button^  button1;
+	private: System::Windows::Forms::Panel^  panel3;
+	private: System::Windows::Forms::Label^  label6;
+	private: System::Windows::Forms::TextBox^  textBox4;
+	private: System::Windows::Forms::Label^  label7;
+	private: System::Windows::Forms::Label^  label8;
+	private: System::Windows::Forms::TextBox^  textBox5;
+	private: System::Windows::Forms::Label^  label9;
+	private: System::Windows::Forms::TextBox^  textBox6;
 	private:
 		/// <summary>
 		/// Erforderliche Designervariable.
@@ -85,10 +93,19 @@ namespace RC_Cars {
 			this->panel2 = (gcnew System::Windows::Forms::Panel());
 			this->button1 = (gcnew System::Windows::Forms::Button());
 			this->label5 = (gcnew System::Windows::Forms::Label());
+			this->panel3 = (gcnew System::Windows::Forms::Panel());
+			this->label6 = (gcnew System::Windows::Forms::Label());
+			this->textBox4 = (gcnew System::Windows::Forms::TextBox());
+			this->label7 = (gcnew System::Windows::Forms::Label());
+			this->label8 = (gcnew System::Windows::Forms::Label());
+			this->textBox5 = (gcnew System::Windows::Forms::TextBox());
+			this->label9 = (gcnew System::Windows::Forms::Label());
+			this->textBox6 = (gcnew System::Windows::Forms::TextBox());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->pictureBox1))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBar1))->BeginInit();
 			this->panel1->SuspendLayout();
 			this->panel2->SuspendLayout();
+			this->panel3->SuspendLayout();
 			this->SuspendLayout();
 			// 
 			// backgroundWorker1
@@ -130,11 +147,11 @@ namespace RC_Cars {
 			// 
 			// textBox1
 			// 
-			this->textBox1->Location = System::Drawing::Point(43, 35);
+			this->textBox1->Location = System::Drawing::Point(40, 35);
 			this->textBox1->Name = L"textBox1";
-			this->textBox1->Size = System::Drawing::Size(38, 20);
+			this->textBox1->Size = System::Drawing::Size(28, 20);
 			this->textBox1->TabIndex = 5;
-			this->textBox1->Text = L"0.1";
+			this->textBox1->Text = L"0.8";
 			this->textBox1->TextAlign = System::Windows::Forms::HorizontalAlignment::Right;
 			this->textBox1->Leave += gcnew System::EventHandler(this, &Form1::textBox1_Leave);
 			// 
@@ -149,19 +166,19 @@ namespace RC_Cars {
 			// 
 			// textBox2
 			// 
-			this->textBox2->Location = System::Drawing::Point(43, 62);
+			this->textBox2->Location = System::Drawing::Point(40, 62);
 			this->textBox2->Name = L"textBox2";
-			this->textBox2->Size = System::Drawing::Size(38, 20);
+			this->textBox2->Size = System::Drawing::Size(28, 20);
 			this->textBox2->TabIndex = 6;
-			this->textBox2->Text = L"1";
+			this->textBox2->Text = L"9999";
 			this->textBox2->TextAlign = System::Windows::Forms::HorizontalAlignment::Right;
 			this->textBox2->Leave += gcnew System::EventHandler(this, &Form1::textBox2_Leave);
 			// 
 			// textBox3
 			// 
-			this->textBox3->Location = System::Drawing::Point(43, 89);
+			this->textBox3->Location = System::Drawing::Point(40, 89);
 			this->textBox3->Name = L"textBox3";
-			this->textBox3->Size = System::Drawing::Size(38, 20);
+			this->textBox3->Size = System::Drawing::Size(28, 20);
 			this->textBox3->TabIndex = 7;
 			this->textBox3->Text = L"0";
 			this->textBox3->TextAlign = System::Windows::Forms::HorizontalAlignment::Right;
@@ -187,12 +204,12 @@ namespace RC_Cars {
 			// 
 			// trackBar1
 			// 
+			this->trackBar1->LargeChange = 1;
 			this->trackBar1->Location = System::Drawing::Point(3, 5);
-			this->trackBar1->Maximum = 60;
+			this->trackBar1->Maximum = 100;
 			this->trackBar1->Name = L"trackBar1";
 			this->trackBar1->Size = System::Drawing::Size(149, 45);
 			this->trackBar1->TabIndex = 3;
-			this->trackBar1->Value = 30;
 			this->trackBar1->Scroll += gcnew System::EventHandler(this, &Form1::trackBar1_Scroll);
 			// 
 			// panel1
@@ -205,9 +222,9 @@ namespace RC_Cars {
 			this->panel1->Controls->Add(this->textBox2);
 			this->panel1->Controls->Add(this->label2);
 			this->panel1->Controls->Add(this->textBox3);
-			this->panel1->Location = System::Drawing::Point(11, 133);
+			this->panel1->Location = System::Drawing::Point(92, 133);
 			this->panel1->Name = L"panel1";
-			this->panel1->Size = System::Drawing::Size(156, 120);
+			this->panel1->Size = System::Drawing::Size(76, 120);
 			this->panel1->TabIndex = 3;
 			// 
 			// label4
@@ -215,9 +232,9 @@ namespace RC_Cars {
 			this->label4->AutoSize = true;
 			this->label4->Location = System::Drawing::Point(11, 8);
 			this->label4->Name = L"label4";
-			this->label4->Size = System::Drawing::Size(70, 13);
+			this->label4->Size = System::Drawing::Size(46, 13);
 			this->label4->TabIndex = 9;
-			this->label4->Text = L"PID-Controler";
+			this->label4->Text = L"Steering";
 			// 
 			// panel2
 			// 
@@ -249,11 +266,93 @@ namespace RC_Cars {
 			this->label5->TabIndex = 12;
 			this->label5->Text = L"Throttle";
 			// 
+			// panel3
+			// 
+			this->panel3->BorderStyle = System::Windows::Forms::BorderStyle::FixedSingle;
+			this->panel3->Controls->Add(this->label6);
+			this->panel3->Controls->Add(this->textBox4);
+			this->panel3->Controls->Add(this->label7);
+			this->panel3->Controls->Add(this->label8);
+			this->panel3->Controls->Add(this->textBox5);
+			this->panel3->Controls->Add(this->label9);
+			this->panel3->Controls->Add(this->textBox6);
+			this->panel3->Location = System::Drawing::Point(12, 133);
+			this->panel3->Name = L"panel3";
+			this->panel3->Size = System::Drawing::Size(74, 120);
+			this->panel3->TabIndex = 4;
+			// 
+			// label6
+			// 
+			this->label6->AutoSize = true;
+			this->label6->Location = System::Drawing::Point(11, 8);
+			this->label6->Name = L"label6";
+			this->label6->Size = System::Drawing::Size(43, 13);
+			this->label6->TabIndex = 9;
+			this->label6->Text = L"Throttle";
+			// 
+			// textBox4
+			// 
+			this->textBox4->Location = System::Drawing::Point(40, 35);
+			this->textBox4->Name = L"textBox4";
+			this->textBox4->Size = System::Drawing::Size(30, 20);
+			this->textBox4->TabIndex = 5;
+			this->textBox4->Text = L"1";
+			this->textBox4->TextAlign = System::Windows::Forms::HorizontalAlignment::Right;
+			this->textBox4->Leave += gcnew System::EventHandler(this, &Form1::textBox4_Leave);
+			// 
+			// label7
+			// 
+			this->label7->AutoSize = true;
+			this->label7->Location = System::Drawing::Point(7, 38);
+			this->label7->Name = L"label7";
+			this->label7->Size = System::Drawing::Size(30, 13);
+			this->label7->TabIndex = 4;
+			this->label7->Text = L"KP =";
+			// 
+			// label8
+			// 
+			this->label8->AutoSize = true;
+			this->label8->Location = System::Drawing::Point(8, 92);
+			this->label8->Name = L"label8";
+			this->label8->Size = System::Drawing::Size(29, 13);
+			this->label8->TabIndex = 8;
+			this->label8->Text = L"Tv =";
+			// 
+			// textBox5
+			// 
+			this->textBox5->Location = System::Drawing::Point(40, 62);
+			this->textBox5->Name = L"textBox5";
+			this->textBox5->Size = System::Drawing::Size(30, 20);
+			this->textBox5->TabIndex = 6;
+			this->textBox5->Text = L"9999";
+			this->textBox5->TextAlign = System::Windows::Forms::HorizontalAlignment::Right;
+			this->textBox5->Leave += gcnew System::EventHandler(this, &Form1::textBox5_Leave);
+			// 
+			// label9
+			// 
+			this->label9->AutoSize = true;
+			this->label9->Location = System::Drawing::Point(8, 65);
+			this->label9->Name = L"label9";
+			this->label9->Size = System::Drawing::Size(29, 13);
+			this->label9->TabIndex = 7;
+			this->label9->Text = L"Tn =";
+			// 
+			// textBox6
+			// 
+			this->textBox6->Location = System::Drawing::Point(40, 89);
+			this->textBox6->Name = L"textBox6";
+			this->textBox6->Size = System::Drawing::Size(30, 20);
+			this->textBox6->TabIndex = 7;
+			this->textBox6->Text = L"0";
+			this->textBox6->TextAlign = System::Windows::Forms::HorizontalAlignment::Right;
+			this->textBox6->Leave += gcnew System::EventHandler(this, &Form1::textBox6_Leave);
+			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(990, 830);
+			this->Controls->Add(this->panel3);
 			this->Controls->Add(this->panel2);
 			this->Controls->Add(this->panel1);
 			this->Controls->Add(this->button_stop);
@@ -267,6 +366,8 @@ namespace RC_Cars {
 			this->panel1->PerformLayout();
 			this->panel2->ResumeLayout(false);
 			this->panel2->PerformLayout();
+			this->panel3->ResumeLayout(false);
+			this->panel3->PerformLayout();
 			this->ResumeLayout(false);
 
 		}
@@ -280,24 +381,18 @@ private: System::Void button_start_Click(System::Object^  sender, System::EventA
 private: System::Void pictureBox1_Paint(System::Object^  sender, System::Windows::Forms::PaintEventArgs^  e) {
 			 
 			 Pen^ pen=gcnew Pen(Color::Red, 3);
-			 Pen^ pen2=gcnew Pen(Color::Green, 5);
-			 Pen^ pen3=gcnew Pen(Color::Black, 2);
-
 			 //draw red cross
 			 for (int i=0; i<5;i++){
 				e->Graphics->DrawLine(pen,(int)X[i]/5+400-6,(int)-Y[i]/5+400,(int)X[i]/5+400+7,(int)-Y[i]/5+400);
 				e->Graphics->DrawLine(pen,(int)X[i]/5+400,(int)-Y[i]/5+400-6,(int)X[i]/5+400,(int)-Y[i]/5+400+7);
 			 }
-
-			 //draw controller output value
-			 e->Graphics->DrawLine(pen2,10,10,10+(15+u)*10,10);
-			 e->Graphics->DrawLine(pen3,10,5,310,5);
-
-			 delete pen; delete pen2; delete pen3;
+			 delete pen;
 		 }
 private: System::Void backgroundWorker1_DoWork(System::Object^  sender, System::ComponentModel::DoWorkEventArgs^  e) {
-			const int rSetPoint = 500;	//set-point radius;
-			int steering=15, oldSteering=15, oldThrottle=30;
+			const int wRadius = 500;	//set-point radius;
+			int steering=15, oldSteering= 128 + 15, throttle=30, oldThrottle=30;
+			double uSteering, uThrottle, radius, velocity;
+			double Xold, Yold;				// previous step coordinates
 			LARGE_INTEGER frequency;        // ticks per second, for accurate time measurement
 			LARGE_INTEGER t1, t2;           // ticks, for accurate time measurement
 
@@ -309,29 +404,39 @@ private: System::Void backgroundWorker1_DoWork(System::Object^  sender, System::
 			QueryPerformanceCounter(&t1);	// get starting time
 
 			Serial *mycomport = new Serial("COM3");		//use the Arduino COM Port here, can be found in Arduino IDE
-			PID_Controller controller1(uMin, uMax);
+			PID_Controller controller1(steeringMin, steeringMax);
+			PID_Controller controller2(throttleMin, throttleMax);
 			while (true){
 				//get coordinates (waits for new frame (Vicon Tracker frame rate) )
 				getCoordinates();
 
+				radius = sqrt(X[0]*X[0]+Y[0]*Y[0]);
+				velocity = sqrt((X[0]-Xold)*(X[0]-Xold)+(Y[0]-Yold)*(Y[0]-Yold)) / 0.01 * 0.0036; //dt;
+				Xold = X[0];
+				Yold = Y[0];
+
 				//PID-controller
-				u = controller1.step(rSetPoint, sqrt(X[0]*X[0]+Y[0]*Y[0]), KP, Tn, Tv); 
+				uSteering = controller1.step(wRadius, radius, KPs, Tns, Tvs); 
+
+				uThrottle = controller2.step(wVelocity, velocity, KPt, Tnt, Tvt);
 				
 				//get time for txt
 				QueryPerformanceCounter(&t2);
 				
 				//send data to car
-				steering = (int) u - uMin;
+				steering = (int) uSteering + 15;
+				steering |= 1 << 7;
 				if (steering != oldSteering)
-					mycomport->WriteData(steering |= 1 << 7, 1);	//steering
+					mycomport->WriteData(steering, 1);	//steering
 				oldSteering = steering;
+
+				throttle = (int) -uThrottle + 30;
 				if (throttle != oldThrottle)
 					mycomport->WriteData(throttle, 1);	//throttle
 				oldThrottle = throttle;
 
 				//write txt
 				DataTxt << (t2.QuadPart - t1.QuadPart) * 1000 / frequency.QuadPart << "\t" //time
-					//<< u <<"\t"<< controller.error << "\t"<< controller.E <<"\n";
 						<< X[0] << "\t"	<< Y[0] << "\t"	<< D[0] << "\t"	
 						<< X[1] << "\t"	<< Y[1] << "\t"	<< D[1] << "\t"
 						<< X[2] << "\t"	<< Y[2] << "\t"	<< D[2] << "\t"
@@ -350,8 +455,7 @@ private: System::Void backgroundWorker1_DoWork(System::Object^  sender, System::
 		 }
 private: System::Void button_stop_Click(System::Object^  sender, System::EventArgs^  e) {
 			 //initializes backgroundWorker1 cancellation
-			 this->trackBar1->Value = 30;
-			 throttle = 30;
+			 this->trackBar1->Value = 0;
 			 this->backgroundWorker1->CancelAsync();
 			 this->button_stop->Enabled = false;
 			 this->button_start->Enabled = true;
@@ -362,16 +466,16 @@ private: System::Void backgroundWorker1_RunWorkerCompleted(System::Object^  send
 			 //MessageBox::Show("");
 		 }
 private: System::Void textBox1_Leave(System::Object^  sender, System::EventArgs^  e) {
-			 KP = System::Convert::ToDouble(this->textBox1->Text);
+			 KPs = System::Convert::ToDouble(this->textBox1->Text);
 		 }
 private: System::Void textBox2_Leave(System::Object^  sender, System::EventArgs^  e) {
 			 double x = System::Convert::ToDouble(this->textBox2->Text);
 			 //Tn must be greater than zero
 			 if (x>0)
-				 Tn = x;
+				 Tns = x;
 			 else{
 				 this->textBox2->Text = "1";
-				 Tn = 1;
+				 Tns = 1;
 			 }
 		 }
 private: System::Void textBox3_Leave(System::Object^  sender, System::EventArgs^  e) {
@@ -379,19 +483,43 @@ private: System::Void textBox3_Leave(System::Object^  sender, System::EventArgs^
 			 //Tv must not be less than zero
 			 if (x<0){
 				 this->textBox3->Text = "0";
-				 Tv = 0;
+				 Tvs = 0;
 			 }
 			 else
-				 Tv = x;
+				 Tvs = x;
 		 }
 private: System::Void trackBar1_Scroll(System::Object^  sender, System::EventArgs^  e) {
 			 //throttle = 0 => max forward; throttle = 60 max backward; trackBar1 = [0;60]
-			 throttle = 60 - this->trackBar1->Value;
+			 wVelocity = this->trackBar1->Value;
 		 }
 private: System::Void button1_Click(System::Object^  sender, System::EventArgs^  e) {
 			 //sets treckBar1 and throttle to 30 => motor stop
-			 this->trackBar1->Value = 30;
-			 throttle = 30;
+			 this->trackBar1->Value = 0;
+			 wVelocity = 0;
+		 }
+private: System::Void textBox4_Leave(System::Object^  sender, System::EventArgs^  e) {
+			 KPt = System::Convert::ToDouble(this->textBox4->Text);
+		 }
+private: System::Void textBox5_Leave(System::Object^  sender, System::EventArgs^  e) {
+			 double x = System::Convert::ToDouble(this->textBox5->Text);
+			 //Tn must be greater than zero
+			 if (x>0)
+				 Tnt = x;
+			 else{
+				 this->textBox5->Text = "1";
+				 Tnt = 1;
+			 }
+		 }
+private: System::Void textBox6_Leave(System::Object^  sender, System::EventArgs^  e) {
+			 double x = System::Convert::ToDouble(this->textBox6->Text);
+			 //Tv must not be less than zero
+			 if (x<0){
+				 this->textBox6->Text = "0";
+				 Tvt = 0;
+			 }
+			 else
+				 Tvt = x;
 		 }
 };
 }
+

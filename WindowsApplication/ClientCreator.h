@@ -1,15 +1,17 @@
 #include <Client.h>
 #include <iostream>
-#include <time.h>
+#include "time.h"
+#include "windows.h"
 #include <conio.h>   // For _kbhit()
 #include <cstdio>	// For getchar()
 #include <fstream>	// For txt-File
 
 double X[5], Y[5], D[5];			//x-, y-coordinates, direction
-double KP=0.1, Tn=1, Tv=0, u;		//proportional gain, integral time, derivative time, controller output
-int throttle=30;					// 0 max forward, 60 max backward, 30 stop
-const double uMax = 15;				//high controller output boundary
-const double uMin = -15;			//low controller output boundary
+double KPs=0.8, Tns=9999, Tvs=0;	//proportional gain, integral time, derivative time, controller output (steering)
+double KPt=  1, Tnt=9999, Tvt=0;	//proportional gain, integral time, derivative time, controller output (throttle)
+int wRadius, wVelocity;			// 
+const double steeringMax = 14, throttleMax = 30;	//high controller output boundary
+const double steeringMin =-14, throttleMin =-30;	//low controller output boundary
 std::ofstream DataTxt;				//txt-file for writing X, Y, D
 
 bool TransmitMulticast;
