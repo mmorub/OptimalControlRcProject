@@ -4,8 +4,6 @@
 PID_Controller::PID_Controller(double lowBoundary, double highBoundary){
 	lB = lowBoundary;
 	hB = highBoundary;
-	QueryPerformanceCounter(&oldTime);	//get current time
-	QueryPerformanceFrequency(&freq);	//get ticks per sec
 	error = 0;
 	oldError = 0;
 	E = 0;
@@ -13,23 +11,17 @@ PID_Controller::PID_Controller(double lowBoundary, double highBoundary){
 	overshoot = false;
 }
 
-double PID_Controller::step(double setPoint, double outputValue, double Kp, double Tn, double Tv){
-	//get current time
-	QueryPerformanceCounter(&time);	
-
-	// elapsed time since last frame
-	dt = (time.QuadPart - oldTime.QuadPart) *1000 / freq.QuadPart; 
-
+double PID_Controller::step(double setPoint, double outputValue, double Kp, double Tn, double Tv, double dt){
 	//error
 	error = setPoint - outputValue;
 
 	//accumulate error (trapezoidal) if NOT overshoot
 	if (!overshoot){
-		E = E + (((error + oldError) / 2) * dt/1000); 
+		E = E + (((error + oldError) / 2) * dt); 
 	}
 
 	// derivative error
-	de = (error - oldError) / dt/1000;	
+	de = (error - oldError) / dt;	
 
 	//output value
 	u = Kp * error + (E / Tn) + (de * Tv);
@@ -48,7 +40,6 @@ double PID_Controller::step(double setPoint, double outputValue, double Kp, doub
 
 	//prepare next step
 	oldError = error;
-	oldTime = time;
 
 	return u;
 }

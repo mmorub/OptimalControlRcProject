@@ -63,6 +63,7 @@ namespace RC_Cars {
 	private: System::Windows::Forms::TextBox^  textBox5;
 	private: System::Windows::Forms::Label^  label9;
 	private: System::Windows::Forms::TextBox^  textBox6;
+
 	private:
 		/// <summary>
 		/// Erforderliche Designervariable.
@@ -249,7 +250,7 @@ namespace RC_Cars {
 			// 
 			// button1
 			// 
-			this->button1->Location = System::Drawing::Point(43, 56);
+			this->button1->Location = System::Drawing::Point(41, 56);
 			this->button1->Name = L"button1";
 			this->button1->Size = System::Drawing::Size(75, 23);
 			this->button1->TabIndex = 4;
@@ -296,7 +297,7 @@ namespace RC_Cars {
 			this->textBox4->Name = L"textBox4";
 			this->textBox4->Size = System::Drawing::Size(30, 20);
 			this->textBox4->TabIndex = 5;
-			this->textBox4->Text = L"1";
+			this->textBox4->Text = L"0.01";
 			this->textBox4->TextAlign = System::Windows::Forms::HorizontalAlignment::Right;
 			this->textBox4->Leave += gcnew System::EventHandler(this, &Form1::textBox4_Leave);
 			// 
@@ -324,7 +325,7 @@ namespace RC_Cars {
 			this->textBox5->Name = L"textBox5";
 			this->textBox5->Size = System::Drawing::Size(30, 20);
 			this->textBox5->TabIndex = 6;
-			this->textBox5->Text = L"9999";
+			this->textBox5->Text = L"30";
 			this->textBox5->TextAlign = System::Windows::Forms::HorizontalAlignment::Right;
 			this->textBox5->Leave += gcnew System::EventHandler(this, &Form1::textBox5_Leave);
 			// 
@@ -393,36 +394,55 @@ private: System::Void backgroundWorker1_DoWork(System::Object^  sender, System::
 			int steering=15, oldSteering= 128 + 15, throttle=30, oldThrottle=30;
 			double uSteering, uThrottle, radius, velocity;
 			double Xold, Yold;				// previous step coordinates
-			LARGE_INTEGER frequency;        // ticks per second, for accurate time measurement
-			LARGE_INTEGER t1, t2;           // ticks, for accurate time measurement
+			double dt;						// elapsed time since last frame [sec.]
+			LARGE_INTEGER freq;				// ticks per second, for accurate time measurement
+			LARGE_INTEGER t1, t2, t3;       // ticks, for accurate time measurement
+			double vD, dD;					// direction of velocity vector, angel difference
 
 			// Create txt-File
 			DataTxt.std::ofstream::open("Data.txt"); 
 			DataTxt << "time\tX1\tY1\tRZ1\tX2\tY2\tRZ2\tX3\tY3\tRZ3\tX4\tY4\tRZ4\tX5\tY5\tRZ5\n" ;
 			
-			QueryPerformanceFrequency(&frequency); // get ticks per second
+			QueryPerformanceFrequency(&freq); // get ticks per second
 			QueryPerformanceCounter(&t1);	// get starting time
+			QueryPerformanceCounter(&t3);
 
 			Serial *mycomport = new Serial("COM3");		//use the Arduino COM Port here, can be found in Arduino IDE
 			PID_Controller controller1(steeringMin, steeringMax);
 			PID_Controller controller2(throttleMin, throttleMax);
+
+			//set old coordinates to current coordinates
+			getCoordinates();
+			Xold = X[0];
+			Yold = Y[0];
+
 			while (true){
+				//check for cancellation
+				if (this->backgroundWorker1->CancellationPending)
+					break;
+
+				//get current time
+				QueryPerformanceCounter(&t2);	
+
+				// elapsed time since last frame [sec.]
+				dt = ( (double)(t2.QuadPart - t3.QuadPart) ) / freq.QuadPart; 
+
 				//get coordinates (waits for new frame (Vicon Tracker frame rate) )
 				getCoordinates();
+				
+				radius = sqrt(X[0]*X[0]+Y[0]*Y[0]);										// [mm]
+				velocity = sqrt((X[0]-Xold)*(X[0]-Xold)+(Y[0]-Yold)*(Y[0]-Yold)) / dt;	// [mm/sec]
 
-				radius = sqrt(X[0]*X[0]+Y[0]*Y[0]);
-				velocity = sqrt((X[0]-Xold)*(X[0]-Xold)+(Y[0]-Yold)*(Y[0]-Yold)) / 0.01 * 0.0036; //dt;
-				Xold = X[0];
-				Yold = Y[0];
+				//detect direction of velocity vector
+				vD = atan2(Y[0]-Yold,X[0]-Xold);	//vD = [-pi;pi]
+				dD = abs(D[0] - vD);				//angle difference
+				if ((dD > (pi/2)) && (dD < (3/2*pi)))	// car moves backward
+					velocity = -velocity; 
 
 				//PID-controller
-				uSteering = controller1.step(wRadius, radius, KPs, Tns, Tvs); 
-
-				uThrottle = controller2.step(wVelocity, velocity, KPt, Tnt, Tvt);
-				
-				//get time for txt
-				QueryPerformanceCounter(&t2);
-				
+				uSteering = controller1.step(wRadius, radius, KPs, Tns, Tvs, dt); 
+				uThrottle = controller2.step(wVelocity, velocity, KPt, Tnt, Tvt, dt);
+								
 				//send data to car
 				steering = (int) uSteering + 15;
 				steering |= 1 << 7;
@@ -436,22 +456,24 @@ private: System::Void backgroundWorker1_DoWork(System::Object^  sender, System::
 				oldThrottle = throttle;
 
 				//write txt
-				DataTxt << (t2.QuadPart - t1.QuadPart) * 1000 / frequency.QuadPart << "\t" //time
+				DataTxt << ((double)(t2.QuadPart - t1.QuadPart)) / freq.QuadPart << "\t" //time
 						<< X[0] << "\t"	<< Y[0] << "\t"	<< D[0] << "\t"	
 						<< X[1] << "\t"	<< Y[1] << "\t"	<< D[1] << "\t"
 						<< X[2] << "\t"	<< Y[2] << "\t"	<< D[2] << "\t"
 						<< X[3] << "\t"	<< Y[3] << "\t"	<< D[3] << "\t"
 						<< X[4] << "\t"	<< Y[4] << "\t"	<< D[4] << "\n";
 
+				//prepare next loop
+				t3 = t2;
+				Xold = X[0];
+				Yold = Y[0];
+				
 				//redraw pictureBox1
 				pictureBox1->Invalidate();
-
-				//check for cancellation
-				if (this->backgroundWorker1->CancellationPending){
-					
-					break;
-				}
-			 }
+			}
+			mycomport->WriteData( 30, 1);		//Stop motor
+			mycomport->WriteData(128 +15, 1);	//steering angle = 0
+			delete mycomport;
 		 }
 private: System::Void button_stop_Click(System::Object^  sender, System::EventArgs^  e) {
 			 //initializes backgroundWorker1 cancellation
@@ -490,7 +512,7 @@ private: System::Void textBox3_Leave(System::Object^  sender, System::EventArgs^
 		 }
 private: System::Void trackBar1_Scroll(System::Object^  sender, System::EventArgs^  e) {
 			 //throttle = 0 => max forward; throttle = 60 max backward; trackBar1 = [0;60]
-			 wVelocity = this->trackBar1->Value;
+			 wVelocity = 10 * this->trackBar1->Value;
 		 }
 private: System::Void button1_Click(System::Object^  sender, System::EventArgs^  e) {
 			 //sets treckBar1 and throttle to 30 => motor stop

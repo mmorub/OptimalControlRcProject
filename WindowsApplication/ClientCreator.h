@@ -5,10 +5,11 @@
 #include <conio.h>   // For _kbhit()
 #include <cstdio>	// For getchar()
 #include <fstream>	// For txt-File
+#define pi 3.14159265358979323846
 
 double X[5], Y[5], D[5];			//x-, y-coordinates, direction
-double KPs=0.8, Tns=9999, Tvs=0;	//proportional gain, integral time, derivative time, controller output (steering)
-double KPt=  1, Tnt=9999, Tvt=0;	//proportional gain, integral time, derivative time, controller output (throttle)
+double KPs= 0.8,	Tns=9999,	Tvs=0;	//proportional gain, integral time, derivative time, controller output (steering)
+double KPt= 0.01,	Tnt=30,		Tvt=0;	//proportional gain, integral time, derivative time, controller output (throttle)
 int wRadius, wVelocity;			// 
 const double steeringMax = 14, throttleMax = 30;	//high controller output boundary
 const double steeringMin =-14, throttleMin =-30;	//low controller output boundary
