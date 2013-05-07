@@ -1,26 +1,18 @@
-#include <Client.h>
-#include <iostream>
-#include "time.h"
-#include "windows.h"
-#include <conio.h>   // For _kbhit()
-#include <cstdio>	// For getchar()
-#include <fstream>	// For txt-File
-#define pi 3.14159265358979323846
+/** \file ClientCreator.h
+	\brief A header file to create a cliet for the Vicon tracker.
 
-double X[5], Y[5], D[5];			//x-, y-coordinates, direction
-double KPs= 0.8,	Tns=9999,	Tvs=0;	//proportional gain, integral time, derivative time, controller output (steering)
-double KPt= 0.01,	Tnt=30,		Tvt=0;	//proportional gain, integral time, derivative time, controller output (throttle)
-int wRadius, wVelocity;			// 
-const double steeringMax = 14, throttleMax = 30;	//high controller output boundary
-const double steeringMin =-14, throttleMin =-30;	//low controller output boundary
-std::ofstream DataTxt;				//txt-file for writing X, Y, D
+	This header provides three funktion to create a client, to disconnect it and to get coordinates
+	of an desired object. This code is a modified copy out of the Vicon example code.
+*/
+#include <Client.h>
+#include "windows.h"
 
 bool TransmitMulticast;
 
 using namespace ViconDataStreamSDK::CPP;
 
 Client MyClient;	//Vicon client
-Output_GetSegmentGlobalTranslation SegmentGlobalTranslation;
+Output_GetSegmentGlobalTranslation SegmentGlobalTranslation; 
 Output_GetSegmentGlobalRotationEulerXYZ SegmentGlobalRotationEulerXYZ;
 
 namespace
@@ -80,20 +72,11 @@ namespace
         return "Unknown";
     }
   }
-#ifdef WIN32
-  bool Hit()
-  {
-    bool hit = false;
-    while( _kbhit() )
-    {
-      getchar();
-      hit = true;
-    }
-    return hit;
-  }
-#endif
 }
 
+///This function creates a client for the Vicon tracker.
+/**
+*/
 void createClient()
 		{
 			TransmitMulticast = false;
@@ -143,6 +126,9 @@ void createClient()
 				}
 			}
 		}
+///This function disconnects the client
+/**
+*/
 void disconnectClient()
 		{
 			if( TransmitMulticast )
@@ -156,37 +142,30 @@ void disconnectClient()
 
 			MyClient.Disconnect();
 		}
-int getCoordinates(){
+///This funktion gets the coordinates of an object.
+/**The X- and Y-coordinates and the orientation of the object named <ObjectName> are stored in the variables X, Y and Rz.
+*/
+void getCoordinates(std::string ObjectName, double& X, double& Y, double& Rz){
 			// Get a frame
 			while( MyClient.GetFrame().Result != Result::Success )
 			{
 			// Sleep a little so that we don't lumber the CPU with a busy poll
 			Sleep( 1 );
-
 			}
-			// Count the number of subjects
-			unsigned int SubjectCount = MyClient.GetSubjectCount().SubjectCount;
-			for( unsigned int SubjectIndex = 0 ; SubjectIndex < SubjectCount ; ++SubjectIndex )
-			{
-				// Get the subject name
-				std::string SubjectName = MyClient.GetSubjectName( SubjectIndex ).SubjectName;
-				
-				// Count the number of segments
-				unsigned int SegmentCount = MyClient.GetSegmentCount( SubjectName ).SegmentCount;
-				for( unsigned int SegmentIndex = 0 ; SegmentIndex < SegmentCount ; ++SegmentIndex )
-					{
-						// Get the segment name
-						std::string SegmentName = MyClient.GetSegmentName( SubjectName, SegmentIndex ).SegmentName;
 						
-						// Get the global segment translation
-						SegmentGlobalTranslation = MyClient.GetSegmentGlobalTranslation( SubjectName, SegmentName );
+			// Get the global segment translation
+			SegmentGlobalTranslation = MyClient.GetSegmentGlobalTranslation( ObjectName, ObjectName );
           
-						// Get the global segment rotation in EulerXYZ co-ordinates
-						SegmentGlobalRotationEulerXYZ = MyClient.GetSegmentGlobalRotationEulerXYZ( SubjectName, SegmentName );
-					}
-			X[SubjectIndex] = SegmentGlobalTranslation.Translation[0];
-			Y[SubjectIndex] = SegmentGlobalTranslation.Translation[1];
-			D[SubjectIndex] = SegmentGlobalRotationEulerXYZ.Rotation[2];
-			}
-			return 0;
+			// Get the global segment rotation in EulerXYZ co-ordinates
+			SegmentGlobalRotationEulerXYZ = MyClient.GetSegmentGlobalRotationEulerXYZ( ObjectName, ObjectName );
+					
+			X = SegmentGlobalTranslation.Translation[0];
+			Y = SegmentGlobalTranslation.Translation[1];
+			//Z = SegmentGlobalTranslation.Translation[2];	
+
+			//Rx = SegmentGlobalRotationEulerXYZ.Rotation[0];
+			//Ry = SegmentGlobalRotationEulerXYZ.Rotation[1];
+			Rz = SegmentGlobalRotationEulerXYZ.Rotation[2];
+
+			return;
 		}
