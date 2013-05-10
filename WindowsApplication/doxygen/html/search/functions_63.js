@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['createclient',['createClient',['../_client_creator_8h.html#a8fc90670800c2944b26fae5b3b218bb0',1,'ClientCreator.h']]]
+  ['clientcreator',['ClientCreator',['../class_client_creator.html#a3c33fca5584a78d903a072dc2c281b53',1,'ClientCreator']]]
 ];

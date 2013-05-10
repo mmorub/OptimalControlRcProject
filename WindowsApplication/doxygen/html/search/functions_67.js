@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['getcoordinates',['getCoordinates',['../_client_creator_8h.html#ac4caa340eb2ba2775bd9246b1119b452',1,'ClientCreator.h']]]
+  ['getcoordinates',['getCoordinates',['../class_client_creator.html#aedb84f255470358ffe9779c8113a5083',1,'ClientCreator']]]
 ];
