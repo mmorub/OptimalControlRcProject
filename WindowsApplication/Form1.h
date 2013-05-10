@@ -31,6 +31,9 @@ double Tvs = 0;		///<derivative time (steering)
 double KPt = 0.01;	///<proportional gain (throttle)
 double Tnt = 30;		///<integral time (throttle)
 double Tvt = 0;		///<derivative time (throttle)
+double time1 = 0;			// total elapsed time
+double radius;				// distance between the origin and the car
+double uSteering;			// controller output steering
 int wRadius = 500;	///<set point radius
 int wVelocity;		///<set point velocity
 const double steeringMax = 14;	///<high controller output boundary (steering)
@@ -117,14 +120,24 @@ namespace RC_Cars {
 	private: System::Windows::Forms::Panel^  panel1;
 	private: System::Windows::Forms::Panel^  panel2;
 	private: System::Windows::Forms::Panel^  panel3;
+	private: System::Windows::Forms::DataVisualization::Charting::Chart^  chart1;
+	private: System::Windows::Forms::Timer^  timer1;
+	private: System::ComponentModel::IContainer^  components;
 	private:
-		System::ComponentModel::Container ^components;
+
 
 #pragma region Windows Form Designer generated code
 		///This funktion intializes all components of the form
 		/**The code is automaticly generated and should NOT be changed manually*/
 		void InitializeComponent(void)
 		{
+			this->components = (gcnew System::ComponentModel::Container());
+			System::Windows::Forms::DataVisualization::Charting::ChartArea^  chartArea1 = (gcnew System::Windows::Forms::DataVisualization::Charting::ChartArea());
+			System::Windows::Forms::DataVisualization::Charting::ChartArea^  chartArea2 = (gcnew System::Windows::Forms::DataVisualization::Charting::ChartArea());
+			System::Windows::Forms::DataVisualization::Charting::Legend^  legend1 = (gcnew System::Windows::Forms::DataVisualization::Charting::Legend());
+			System::Windows::Forms::DataVisualization::Charting::Series^  series1 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
+			System::Windows::Forms::DataVisualization::Charting::Series^  series2 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
+			System::Windows::Forms::DataVisualization::Charting::Series^  series3 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
 			this->backgroundWorker1 = (gcnew System::ComponentModel::BackgroundWorker());
 			this->button_start = (gcnew System::Windows::Forms::Button());
 			this->pictureBox1 = (gcnew System::Windows::Forms::PictureBox());
@@ -151,11 +164,14 @@ namespace RC_Cars {
 			this->textBox5 = (gcnew System::Windows::Forms::TextBox());
 			this->label9 = (gcnew System::Windows::Forms::Label());
 			this->textBox6 = (gcnew System::Windows::Forms::TextBox());
+			this->chart1 = (gcnew System::Windows::Forms::DataVisualization::Charting::Chart());
+			this->timer1 = (gcnew System::Windows::Forms::Timer(this->components));
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->pictureBox1))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBar1))->BeginInit();
 			this->panel1->SuspendLayout();
 			this->panel2->SuspendLayout();
 			this->panel3->SuspendLayout();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->chart1))->BeginInit();
 			this->SuspendLayout();
 			// 
 			// backgroundWorker1
@@ -419,11 +435,49 @@ namespace RC_Cars {
 			this->textBox6->TextAlign = System::Windows::Forms::HorizontalAlignment::Right;
 			this->textBox6->Leave += gcnew System::EventHandler(this, &Form1::textBox6_Leave);
 			// 
+			// chart1
+			// 
+			chartArea1->AxisX->IntervalType = System::Windows::Forms::DataVisualization::Charting::DateTimeIntervalType::Seconds;
+			chartArea1->Name = L"ChartArea1";
+			chartArea2->AxisX->IntervalType = System::Windows::Forms::DataVisualization::Charting::DateTimeIntervalType::Seconds;
+			chartArea2->Name = L"ChartArea2";
+			this->chart1->ChartAreas->Add(chartArea1);
+			this->chart1->ChartAreas->Add(chartArea2);
+			legend1->Enabled = false;
+			legend1->Name = L"Legend1";
+			this->chart1->Legends->Add(legend1);
+			this->chart1->Location = System::Drawing::Point(11, 398);
+			this->chart1->Name = L"chart1";
+			series1->ChartArea = L"ChartArea1";
+			series1->ChartType = System::Windows::Forms::DataVisualization::Charting::SeriesChartType::FastLine;
+			series1->Legend = L"Legend1";
+			series1->Name = L"radius";
+			series2->ChartArea = L"ChartArea1";
+			series2->ChartType = System::Windows::Forms::DataVisualization::Charting::SeriesChartType::StepLine;
+			series2->Legend = L"Legend1";
+			series2->Name = L"setpoint";
+			series3->ChartArea = L"ChartArea2";
+			series3->ChartType = System::Windows::Forms::DataVisualization::Charting::SeriesChartType::FastLine;
+			series3->Legend = L"Legend1";
+			series3->Name = L"output";
+			this->chart1->Series->Add(series1);
+			this->chart1->Series->Add(series2);
+			this->chart1->Series->Add(series3);
+			this->chart1->Size = System::Drawing::Size(699, 202);
+			this->chart1->TabIndex = 5;
+			this->chart1->Text = L"chart1";
+			// 
+			// timer1
+			// 
+			this->timer1->Enabled = true;
+			this->timer1->Tick += gcnew System::EventHandler(this, &Form1::timer1_Tick);
+			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(722, 399);
+			this->ClientSize = System::Drawing::Size(722, 612);
+			this->Controls->Add(this->chart1);
 			this->Controls->Add(this->panel3);
 			this->Controls->Add(this->panel2);
 			this->Controls->Add(this->panel1);
@@ -440,6 +494,7 @@ namespace RC_Cars {
 			this->panel2->PerformLayout();
 			this->panel3->ResumeLayout(false);
 			this->panel3->PerformLayout();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->chart1))->EndInit();
 			this->ResumeLayout(false);
 
 		}
@@ -449,6 +504,7 @@ private: System::Void button_start_Click(System::Object^  sender, System::EventA
 				 this->button_start->Enabled = false;
 				 this->button_stop->Enabled = true;
 				 this->button_stop->Focus();
+				 this->timer1->Enabled = true;
 				 backgroundWorker1->RunWorkerAsync();
 			 }
 ///This funktion is called to redraw pictureBox1
@@ -473,18 +529,15 @@ necessary to call PID_Controller::step for the steering and the throttle. The co
 the Arduino via Serial::WriteData. When the loop is canceld throttle and steering of the car is set to zero and
 this function finishes.*/
 private: System::Void backgroundWorker1_DoWork(System::Object^  sender, System::ComponentModel::DoWorkEventArgs^  e) {
-			double uSteering;			// controller output steering
 			double uThrottle;			// controller output throttle
 			int steering=15;			// discrete steering shifted
 			int oldSteering= 128 + 15;	// previous loop discrete steering
 			int throttle=30;			// discrete throttle shifted
 			int oldThrottle=30;			// privious loop discrete throttle
-			double radius;				// distance between the origin and the car
 			double velocity;			// velocity of the car
 			double Xold;				// X-coordinate of the previous loop
 			double Yold;				// Y-coordinate of the previous loop
 			double dt;					// elapsed time since last frame [sec.]
-			double time = 0;			// total elapsed time
 			LARGE_INTEGER freq;			// ticks per second, for accurate time measurement
 			LARGE_INTEGER t1, t2, t3;	// ticks, for accurate time measurement
 			double vD, dD;				// direction of velocity vector, angel difference
@@ -514,7 +567,7 @@ private: System::Void backgroundWorker1_DoWork(System::Object^  sender, System::
 
 				//get current time
 				QueryPerformanceCounter(&t2);
-				time = ((double)(t2.QuadPart - t1.QuadPart)) / freq.QuadPart;
+				time1 = ((double)(t2.QuadPart - t1.QuadPart)) / freq.QuadPart;
 
 				// elapsed time since last frame [sec.]
 				dt = ( (double)(t2.QuadPart - t3.QuadPart) ) / freq.QuadPart; 
@@ -548,7 +601,7 @@ private: System::Void backgroundWorker1_DoWork(System::Object^  sender, System::
 				oldThrottle = throttle;
 
 				//write txt
-				DataTxt << time << "\t" //time
+				DataTxt << time1 << "\t" //time
 						<< X << "\t"	<< Y << "\t"	<< D << "\t" 
 						<< velocity << "\t" << (int) uThrottle << "\n";
 
@@ -569,6 +622,7 @@ private: System::Void button_stop_Click(System::Object^  sender, System::EventAr
 			 //initializes backgroundWorker1 cancellation
 			 this->trackBar1->Value = 0;
 			 this->backgroundWorker1->CancelAsync();
+			 this->timer1->Enabled = false;
 			 this->button_stop->Enabled = false;
 			 this->button_start->Enabled = true;
 			 this->button_start->Focus();
@@ -682,6 +736,12 @@ private: System::Void textBox7_Leave(System::Object^  sender, System::EventArgs^
 				 this->textBox7->Text = "500";
 				 wRadius = 500;
 			 }
+		 }
+private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e) {
+				//graph
+				this->chart1->Series["radius"]->Points->AddXY(time1,radius);
+				this->chart1->Series["setpoint"]->Points->AddXY(time1,wRadius);
+				this->chart1->Series["output"]->Points->AddXY(time1,uSteering);
 		 }
 };
 }
