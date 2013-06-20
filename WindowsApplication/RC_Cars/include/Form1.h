@@ -1,15 +1,24 @@
 /** \mainpage 
  * \section intro Introduction
  *
- * This is the introduction.
+ * RC_Cars is part of the Optimal Control RC Project.
+ * This application's task is to control an RC Car, that it will drive circles.
+ * 
  *
- * \subsection step1 Step 1:
+ * \subsection setup Setup:
  *  
- * etc...
+ * The car to be controlled is tracked by a camera tracking system (Vicon http://www.vicon.com/).
+ * The application receives data about the car from the Vicon system via a client.
+ * Output values for steering and throttle are calculated by the application and are send too a Arduino 
+ * micro controller, which emulates a remote control and transmits the signals to the car.
+ * 
+ * \subsection ide IDE:
+
+ * Microsoft Visual Studio 2010
  */
 
 /** \file Form1.h
-	\brief This header file describes a Windows Form
+	\brief This header file describes the main Form of the application.
 
 	For further information got to RC_Cars::Form1.
 */
@@ -20,27 +29,7 @@
 #include "time.h"
 #include <PID_Controller.h>
 #include <fstream>	// For txt-File
-#define pi 3.14159265358979323846
-
-double X;	///<x-coordinate
-double Y;	///<y-coordinate
-double D;	///<direction
-double KPs = 0.8;	///<proportional gain (steering)
-double Tns = 9999;	///<integral time (steering)
-double Tvs = 0;		///<derivative time (steering)
-double KPt = 0.01;	///<proportional gain (throttle)
-double Tnt = 30;		///<integral time (throttle)
-double Tvt = 0;		///<derivative time (throttle)
-double time1 = 0;			// total elapsed time
-double radius;				// distance between the origin and the car
-double uSteering = 0;			// controller output steering
-int wRadius = 500;	///<set point radius
-int wVelocity;		///<set point velocity
-const double steeringMax = 14;	///<high controller output boundary (steering)
-const double throttleMax = 30;	///<high controller output boundary (throttle)
-const double steeringMin =-14;	///<low controller output boundary (steering)
-const double throttleMin =-30;	///<low controller output boundary (throttle)
-std::ofstream DataTxt;			///<txt-file for writing X, Y, D
+#include <constants.h>
 
 namespace RC_Cars {
 
@@ -62,22 +51,13 @@ namespace RC_Cars {
 	{
 	public:
 		///Constructor
-		/**First the constructor initializes all form components (buttons, text boxes, etc.) by calling InitializeComponent().*/
-		Form1(void)
-		{
-			InitializeComponent();
-		}
+		/**The constructor initializes all form components (buttons, text boxes, etc.) by calling InitializeComponent() and initializes some variables.*/
+		Form1(void);
 
 	protected:
 		///Destructor
 		/**The destructor deletes all components of the form.*/
-		~Form1()
-		{
-			if (components)
-			{
-				delete components;
-			}
-		}
+		~Form1();
 	///A BackgroundWorker is an object given in VS to run an additional thread
 	/**This thread is needed to continuously run the functions to track and control the car, while the main thread
 	manages in-/output of the form.*/
@@ -120,17 +100,39 @@ namespace RC_Cars {
 	private: System::Windows::Forms::Panel^  panel1;
 	private: System::Windows::Forms::Panel^  panel2;
 	private: System::Windows::Forms::Panel^  panel3;
-
+	///This chart visualizes radius, set point and controller output for steering
+	private: System::Windows::Forms::DataVisualization::Charting::Chart^  chart1;
+	///timer1 adds new points to the graphs in chart1 and invalidates pictureBox1 25 times per sec.
+	private: System::Windows::Forms::Timer^  timer1;
 	private: System::ComponentModel::IContainer^  components;
 	private:
-		
-
+		double X;	///<x-coordinate
+		double Y;	///<y-coordinate
+		double D;	///<direction
+		double KPs;	///<proportional gain (steering)
+		double Tns;	///<integral time (steering)
+		double Tvs;	///<derivative time (steering)
+		double KPt;	///<proportional gain (throttle)
+		double Tnt;	///<integral time (throttle)
+		double Tvt;	///<derivative time (throttle)
+		double time1; ///< total elapsed time
+		double radius; ///< distance between the origin and the car
+		double uSteering; ///< controller output steering
+		double wRadius;	///<set point radius
+		int wVelocity;	///<set point velocity
 
 #pragma region Windows Form Designer generated code
-		///This funktion intializes all components of the form
-		/**The code is automaticly generated and should NOT be changed manually*/
+		///This function initializes all components of the form
+		/**The code is automatically generated and should NOT be changed manually*/
 		void InitializeComponent(void)
 		{
+			this->components = (gcnew System::ComponentModel::Container());
+			System::Windows::Forms::DataVisualization::Charting::ChartArea^  chartArea1 = (gcnew System::Windows::Forms::DataVisualization::Charting::ChartArea());
+			System::Windows::Forms::DataVisualization::Charting::ChartArea^  chartArea2 = (gcnew System::Windows::Forms::DataVisualization::Charting::ChartArea());
+			System::Windows::Forms::DataVisualization::Charting::Legend^  legend1 = (gcnew System::Windows::Forms::DataVisualization::Charting::Legend());
+			System::Windows::Forms::DataVisualization::Charting::Series^  series1 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
+			System::Windows::Forms::DataVisualization::Charting::Series^  series2 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
+			System::Windows::Forms::DataVisualization::Charting::Series^  series3 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
 			this->backgroundWorker1 = (gcnew System::ComponentModel::BackgroundWorker());
 			this->button_start = (gcnew System::Windows::Forms::Button());
 			this->pictureBox1 = (gcnew System::Windows::Forms::PictureBox());
@@ -157,18 +159,20 @@ namespace RC_Cars {
 			this->textBox5 = (gcnew System::Windows::Forms::TextBox());
 			this->label9 = (gcnew System::Windows::Forms::Label());
 			this->textBox6 = (gcnew System::Windows::Forms::TextBox());
+			this->chart1 = (gcnew System::Windows::Forms::DataVisualization::Charting::Chart());
+			this->timer1 = (gcnew System::Windows::Forms::Timer(this->components));
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->pictureBox1))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBar1))->BeginInit();
 			this->panel1->SuspendLayout();
 			this->panel2->SuspendLayout();
 			this->panel3->SuspendLayout();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->chart1))->BeginInit();
 			this->SuspendLayout();
 			// 
 			// backgroundWorker1
 			// 
 			this->backgroundWorker1->WorkerSupportsCancellation = true;
 			this->backgroundWorker1->DoWork += gcnew System::ComponentModel::DoWorkEventHandler(this, &Form1::backgroundWorker1_DoWork);
-			this->backgroundWorker1->RunWorkerCompleted += gcnew System::ComponentModel::RunWorkerCompletedEventHandler(this, &Form1::backgroundWorker1_RunWorkerCompleted);
 			// 
 			// button_start
 			// 
@@ -185,7 +189,7 @@ namespace RC_Cars {
 			this->pictureBox1->BackColor = System::Drawing::Color::White;
 			this->pictureBox1->Location = System::Drawing::Point(174, 12);
 			this->pictureBox1->Name = L"pictureBox1";
-			this->pictureBox1->Size = System::Drawing::Size(540, 380);
+			this->pictureBox1->Size = System::Drawing::Size(300, 300);
 			this->pictureBox1->TabIndex = 1;
 			this->pictureBox1->TabStop = false;
 			this->pictureBox1->Paint += gcnew System::Windows::Forms::PaintEventHandler(this, &Form1::pictureBox1_Paint);
@@ -207,7 +211,7 @@ namespace RC_Cars {
 			this->textBox1->Name = L"textBox1";
 			this->textBox1->Size = System::Drawing::Size(28, 20);
 			this->textBox1->TabIndex = 5;
-			this->textBox1->Text = L"0.8";
+			this->textBox1->Text = L"0,8";
 			this->textBox1->TextAlign = System::Windows::Forms::HorizontalAlignment::Right;
 			this->textBox1->Leave += gcnew System::EventHandler(this, &Form1::textBox1_Leave);
 			// 
@@ -374,7 +378,7 @@ namespace RC_Cars {
 			this->textBox4->Name = L"textBox4";
 			this->textBox4->Size = System::Drawing::Size(30, 20);
 			this->textBox4->TabIndex = 5;
-			this->textBox4->Text = L"0.01";
+			this->textBox4->Text = L"0,01";
 			this->textBox4->TextAlign = System::Windows::Forms::HorizontalAlignment::Right;
 			this->textBox4->Leave += gcnew System::EventHandler(this, &Form1::textBox4_Leave);
 			// 
@@ -425,11 +429,90 @@ namespace RC_Cars {
 			this->textBox6->TextAlign = System::Windows::Forms::HorizontalAlignment::Right;
 			this->textBox6->Leave += gcnew System::EventHandler(this, &Form1::textBox6_Leave);
 			// 
+			// chart1
+			// 
+			this->chart1->BackColor = System::Drawing::Color::Gray;
+			this->chart1->BackSecondaryColor = System::Drawing::Color::Transparent;
+			chartArea1->AxisX->IntervalType = System::Windows::Forms::DataVisualization::Charting::DateTimeIntervalType::Seconds;
+			chartArea1->AxisX->LineColor = System::Drawing::Color::White;
+			chartArea1->AxisX->MajorGrid->IntervalType = System::Windows::Forms::DataVisualization::Charting::DateTimeIntervalType::Seconds;
+			chartArea1->AxisX->MajorGrid->LineColor = System::Drawing::Color::Gray;
+			chartArea1->AxisX->MajorGrid->LineDashStyle = System::Windows::Forms::DataVisualization::Charting::ChartDashStyle::Dot;
+			chartArea1->AxisX->ScrollBar->LineColor = System::Drawing::Color::White;
+			chartArea1->AxisY->Crossing = 1.7976931348623157E+308;
+			chartArea1->AxisY->LabelStyle->Interval = 50;
+			chartArea1->AxisY->LineColor = System::Drawing::Color::White;
+			chartArea1->AxisY->MajorGrid->Interval = 50;
+			chartArea1->AxisY->MajorGrid->LineColor = System::Drawing::Color::Gray;
+			chartArea1->AxisY->MajorGrid->LineDashStyle = System::Windows::Forms::DataVisualization::Charting::ChartDashStyle::Dot;
+			chartArea1->AxisY->MajorTickMark->Interval = 50;
+			chartArea1->AxisY->Maximum = 500;
+			chartArea1->AxisY->Minimum = 400;
+			chartArea1->AxisY->Title = L"radius";
+			chartArea1->BackColor = System::Drawing::Color::Black;
+			chartArea1->BorderColor = System::Drawing::Color::Transparent;
+			chartArea1->Name = L"ChartArea1";
+			chartArea2->AxisX->InterlacedColor = System::Drawing::Color::White;
+			chartArea2->AxisX->Interval = 10;
+			chartArea2->AxisX->IntervalAutoMode = System::Windows::Forms::DataVisualization::Charting::IntervalAutoMode::VariableCount;
+			chartArea2->AxisX->IntervalType = System::Windows::Forms::DataVisualization::Charting::DateTimeIntervalType::Seconds;
+			chartArea2->AxisX->LabelStyle->ForeColor = System::Drawing::Color::White;
+			chartArea2->AxisX->LineColor = System::Drawing::Color::White;
+			chartArea2->AxisX->MajorGrid->LineColor = System::Drawing::Color::White;
+			chartArea2->AxisX->TitleForeColor = System::Drawing::Color::White;
+			chartArea2->AxisY->Interval = 5;
+			chartArea2->AxisY->LineColor = System::Drawing::Color::White;
+			chartArea2->AxisY->MajorGrid->Interval = 5;
+			chartArea2->AxisY->MajorGrid->LineColor = System::Drawing::Color::Gray;
+			chartArea2->AxisY->MajorGrid->LineDashStyle = System::Windows::Forms::DataVisualization::Charting::ChartDashStyle::Dot;
+			chartArea2->AxisY->Maximum = 15;
+			chartArea2->AxisY->Minimum = -15;
+			chartArea2->AxisY->Title = L"controller output";
+			chartArea2->BackColor = System::Drawing::Color::Black;
+			chartArea2->BorderColor = System::Drawing::Color::White;
+			chartArea2->CursorX->IntervalType = System::Windows::Forms::DataVisualization::Charting::DateTimeIntervalType::Seconds;
+			chartArea2->Name = L"ChartArea2";
+			this->chart1->ChartAreas->Add(chartArea1);
+			this->chart1->ChartAreas->Add(chartArea2);
+			legend1->Enabled = false;
+			legend1->Name = L"Legend1";
+			this->chart1->Legends->Add(legend1);
+			this->chart1->Location = System::Drawing::Point(12, 318);
+			this->chart1->Name = L"chart1";
+			series1->ChartArea = L"ChartArea1";
+			series1->ChartType = System::Windows::Forms::DataVisualization::Charting::SeriesChartType::FastLine;
+			series1->Color = System::Drawing::Color::Lime;
+			series1->Legend = L"Legend1";
+			series1->Name = L"radius";
+			series2->ChartArea = L"ChartArea1";
+			series2->ChartType = System::Windows::Forms::DataVisualization::Charting::SeriesChartType::StepLine;
+			series2->Color = System::Drawing::Color::Red;
+			series2->Legend = L"Legend1";
+			series2->Name = L"setpoint";
+			series3->ChartArea = L"ChartArea2";
+			series3->ChartType = System::Windows::Forms::DataVisualization::Charting::SeriesChartType::StepLine;
+			series3->Color = System::Drawing::Color::Yellow;
+			series3->Legend = L"Legend1";
+			series3->Name = L"output";
+			this->chart1->Series->Add(series1);
+			this->chart1->Series->Add(series2);
+			this->chart1->Series->Add(series3);
+			this->chart1->Size = System::Drawing::Size(699, 327);
+			this->chart1->TabIndex = 5;
+			this->chart1->Text = L"chart1";
+			// 
+			// timer1
+			// 
+			this->timer1->Enabled = true;
+			this->timer1->Interval = 40;
+			this->timer1->Tick += gcnew System::EventHandler(this, &Form1::timer1_Tick);
+			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(722, 612);
+			this->ClientSize = System::Drawing::Size(719, 657);
+			this->Controls->Add(this->chart1);
 			this->Controls->Add(this->panel3);
 			this->Controls->Add(this->panel2);
 			this->Controls->Add(this->panel1);
@@ -446,29 +529,16 @@ namespace RC_Cars {
 			this->panel2->PerformLayout();
 			this->panel3->ResumeLayout(false);
 			this->panel3->PerformLayout();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->chart1))->EndInit();
 			this->ResumeLayout(false);
 
 		}
 #pragma endregion
 ///This funktion is called when the Start-button is clicked. It calls the backgroundWorker1_DoWork() funktion.
-private: System::Void button_start_Click(System::Object^  sender, System::EventArgs^  e) {
-				 this->button_start->Enabled = false;
-				 this->button_stop->Enabled = true;
-				 this->button_stop->Focus();
-				 backgroundWorker1->RunWorkerAsync();
-			 }
-///This funktion is called to redraw pictureBox1
-/**A red cross is drawen on pictureBox1 do indicate the position of the car.*/
-private: System::Void pictureBox1_Paint(System::Object^  sender, System::Windows::Forms::PaintEventArgs^  e) {
-			 int x, y;
-			 Pen^ pen=gcnew Pen(Color::Red, 3);
-			 //draw red cross
-			 x = (int) X/5+300;
-			 y = (int)-Y/5+240;
-		 	 e->Graphics->DrawLine(pen, x-6, y  , x+7, y  );
-			 e->Graphics->DrawLine(pen, x  , y-6, x  , y+7);
-			 delete pen;
-		 }
+private: System::Void button_start_Click(System::Object^  sender, System::EventArgs^  e);
+///This function is called to redraw pictureBox1
+/**A red cross and a black circle are drawn in pictureBox1 do indicate the position of the car and the set point radius.*/
+private: System::Void pictureBox1_Paint(System::Object^  sender, System::Windows::Forms::PaintEventArgs^  e);
 ///This function runs in the backgroundWorker1 thread.
 /**The main work of this application is done by this function.
 An infinite loop runs in this function until it receives the cancellation signal. Before entering the loop
@@ -478,214 +548,19 @@ the elapsed time since the last loop is measured. These values and the controlle
 necessary to call PID_Controller::step for the steering and the throttle. The controller output values are send to
 the Arduino via Serial::WriteData. When the loop is canceld throttle and steering of the car is set to zero and
 this function finishes.*/
-private: System::Void backgroundWorker1_DoWork(System::Object^  sender, System::ComponentModel::DoWorkEventArgs^  e) {
-			double uThrottle;			// controller output throttle
-			int steering=15;			// discrete steering shifted
-			int oldSteering= 128 + 15;	// previous loop discrete steering
-			int throttle=30;			// discrete throttle shifted
-			int oldThrottle=30;			// previous loop discrete throttle
-			double velocity;			// velocity of the car
-			double Xold;				// X-coordinate of the previous loop
-			double Yold;				// Y-coordinate of the previous loop
-			double dt;					// elapsed time since last frame [sec.]
-			LARGE_INTEGER freq;			// ticks per second, for accurate time measurement
-			LARGE_INTEGER t1, t2, t3;	// ticks, for accurate time measurement
-			double vD, dD;				// direction of velocity vector, angel difference
-
-			// Create txt-File
-			DataTxt.std::ofstream::open("Data.txt"); 
-			DataTxt << "time\tX1\tY1\tRZ1\tv\n" ;
-			
-			QueryPerformanceFrequency(&freq); // get ticks per second
-			QueryPerformanceCounter(&t1);	// get starting time
-			QueryPerformanceCounter(&t3);
-
-			Serial *mycomport = new Serial("COM3");
-			PID_Controller controller1(steeringMin, steeringMax);
-			PID_Controller controller2(throttleMin, throttleMax);
-			ClientCreator ViconClient;
-
-			//set old coordinates to current coordinates, this prevents an instantaneous jump of the car in the first loop
-			ViconClient.getCoordinates("Car1", X, Y, D);
-			Xold = X;
-			Yold = Y;
-			
-			while (true){
-				//check for cancellation
-				if (this->backgroundWorker1->CancellationPending)
-					break;
-
-				//get current time
-				QueryPerformanceCounter(&t2);
-				time1 = ((double)(t2.QuadPart - t1.QuadPart)) / freq.QuadPart;
-
-				// elapsed time since last frame [sec.]
-				dt = ( (double)(t2.QuadPart - t3.QuadPart) ) / freq.QuadPart; 
-
-				//get coordinates (waits for new frame (Vicon Tracker frame rate) )
-				ViconClient.getCoordinates("Car1", X, Y, D);
-				
-				radius = sqrt(X*X+Y*Y);										// [mm]
-				velocity = sqrt((X-Xold)*(X-Xold)+(Y-Yold)*(Y-Yold)) / dt;	// [mm/sec]
-
-				//detect direction of velocity vector
-				vD = atan2(Y-Yold,X-Xold);	//vD = [-pi;pi]
-				dD = abs(D - vD);				//angle difference
-				if ((dD > (pi/2)) && (dD < (3/2*pi)))	// car moves backward
-					velocity = -velocity; 
-
-				//PID-controllers
-				uSteering = controller1.step(wRadius , radius, KPs, Tns, Tvs, dt); 
-				uThrottle = controller2.step(wVelocity, velocity, KPt, Tnt, Tvt, dt);
-							
-				//send data to car
-				steering = (int) uSteering + 15;
-				steering |= 1 << 7;
-				if (steering != oldSteering)
-					mycomport->WriteData(steering, 1);	//steering
-				oldSteering = steering;
-
-				throttle = (int) -uThrottle + 30;
-				if (throttle != oldThrottle)
-					mycomport->WriteData(throttle, 1);	//throttle
-				oldThrottle = throttle;
-
-				//write txt
-				DataTxt << time1 << "\t" //time
-						<< X << "\t"	<< Y << "\t"	<< D << "\t" 
-						<< velocity << "\t" << (int) uThrottle << "\n";
-
-				//prepare next loop
-				t3 = t2;
-				Xold = X;
-				Yold = Y;
-				
-				//redraw pictureBox1
-				pictureBox1->Invalidate();
-			}
-			mycomport->WriteData( 30, 1);		//Stop motor
-			mycomport->WriteData(128 +15, 1);	//steering angle = 0
-			delete mycomport;
-		 }
+private: System::Void backgroundWorker1_DoWork(System::Object^  sender, System::ComponentModel::DoWorkEventArgs^  e);
 ///Clicking the Stop button will cancel the backgroundWorker1_DoWork() function.
-private: System::Void button_stop_Click(System::Object^  sender, System::EventArgs^  e) {
-			 //initializes backgroundWorker1 cancellation
-			 this->trackBar1->Value = 0;
-			 this->backgroundWorker1->CancelAsync();
-			 this->button_stop->Enabled = false;
-			 this->button_start->Enabled = true;
-			 this->button_start->Focus();
-		 }
-///This function is called when backgroundWorker1 completed its work and closes the text file.
-private: System::Void backgroundWorker1_RunWorkerCompleted(System::Object^  sender, System::ComponentModel::RunWorkerCompletedEventArgs^  e) {
-			 DataTxt.std::ofstream::close();
-		 }
-private: System::Void textBox1_Leave(System::Object^  sender, System::EventArgs^  e) {
-			 if (!(Double::TryParse(textBox1->Text, KPs))){
-				 MessageBox::Show("Invalid value for KP-Steering");
-				 this->textBox1->Text = "0";
-			 }
-		 }
-private: System::Void textBox2_Leave(System::Object^  sender, System::EventArgs^  e) {
-			 double x;
-			 if (Double::TryParse(textBox2->Text, x)){
-				 if (x>0)	//Tn must be greater than zero
-					 Tns = x;
-				 else{
-					 MessageBox::Show("Invalid value for Tn-Steering\n\nTn must be greater than 0");
-					 this->textBox2->Text = "9999";
-					 Tns = 9999;
-				 }
-			 }
-			 else{
-				 MessageBox::Show("Invalid value for Tn-Steering\n\nTn must be greater than 0");
-				 this->textBox2->Text = "9999";
-				 Tns = 9999;
-			 }
-		 }
-private: System::Void textBox3_Leave(System::Object^  sender, System::EventArgs^  e) {
-			 double x;
-			 if (Double::TryParse(textBox3->Text, x)){
-			 	 if (x<0){	//Tv must not be less than zero
-					 MessageBox::Show("Invalid value for Tv-Steering\n\nTv must be equal to 0 or greater");
-					 this->textBox3->Text = "0";
-					 Tvs = 0;
-				 }
-				 else
-					 Tvs = x;
-			 }
-			 else{
-				 MessageBox::Show("Invalid value for Tv-Steering\n\nTv must be equal to 0 or greater");
-				 this->textBox3->Text = "0";
-				 Tvs = 0;
-			 }
-		 }
-private: System::Void trackBar1_Scroll(System::Object^  sender, System::EventArgs^  e) {
-			 //throttle = 0 => max forward; throttle = 60 max backward; trackBar1 = [0;60]
-			 wVelocity = 10 * this->trackBar1->Value;
-		 }
-private: System::Void button1_Click(System::Object^  sender, System::EventArgs^  e) {
-			 //sets treckBar1 and throttle to 30 => motor stop
-			 this->trackBar1->Value = 0;
-			 wVelocity = 0;
-		 }
-private: System::Void textBox4_Leave(System::Object^  sender, System::EventArgs^  e) {
-			 if (!(Double::TryParse(textBox4->Text, KPt))){
-				 MessageBox::Show("Invalid value for KP-Throttle");
-				 this->textBox4->Text = "0";
-			 }
-		 }
-private: System::Void textBox5_Leave(System::Object^  sender, System::EventArgs^  e) {
-			 double x;
-			 if (Double::TryParse(textBox5->Text, x)){
-				 if (x>0)	//Tn must be greater than zero
-					 Tnt = x;
-				 else{
-					 MessageBox::Show("Invalid value for Tn-Throttle\n\nTn must be greater than 0");
-					 this->textBox5->Text = "9999";
-					 Tnt = 9999;
-				 }
-			 }
-			 else{
-				 MessageBox::Show("Invalid value for Tn-Throttle\n\nTn must be greater than 0");
-				 this->textBox5->Text = "9999";
-				 Tnt = 9999;
-			 }
-		 }
-private: System::Void textBox6_Leave(System::Object^  sender, System::EventArgs^  e) {
-			 double x;
-			 if (Double::TryParse(textBox6->Text, x)){
-			 	 if (x<0){	//Tv must not be less than zero
-					 MessageBox::Show("Invalid value for Tv-Throttle\n\nTv must be equal to 0 or greater");
-					 this->textBox6->Text = "0";
-					 Tvt = 0;
-				 }
-				 else
-					 Tvt = x;
-			 }
-			 else{
-				 MessageBox::Show("Invalid value for Tv-Throttle\n\nTv must be equal to 0 or greater");
-				 this->textBox6->Text = "0";
-				 Tvt = 0;
-			 }
-		 }
-private: System::Void textBox7_Leave(System::Object^  sender, System::EventArgs^  e) {
-			 double x;
-			 if (Double::TryParse(textBox7->Text, x)){
-				 if (x>0)	//Tn must be greater than zero
-					 wRadius = x;
-				 else{
-					 MessageBox::Show("Invalid value for radius\n\nradius must be greater than 0");
-					 this->textBox7->Text = "500";
-					 wRadius = 500;
-				 }
-			 }
-			 else{
-				 MessageBox::Show("Invalid value for radius\n\nradius must be greater than 0");
-				 this->textBox7->Text = "500";
-				 wRadius = 500;
-			 }
-		 }
+private: System::Void button_stop_Click(System::Object^  sender, System::EventArgs^  e);
+private: System::Void textBox1_Leave(System::Object^  sender, System::EventArgs^  e);
+private: System::Void textBox2_Leave(System::Object^  sender, System::EventArgs^  e);
+private: System::Void textBox3_Leave(System::Object^  sender, System::EventArgs^  e);
+private: System::Void trackBar1_Scroll(System::Object^  sender, System::EventArgs^  e);
+private: System::Void button1_Click(System::Object^  sender, System::EventArgs^  e);
+private: System::Void textBox4_Leave(System::Object^  sender, System::EventArgs^  e);
+private: System::Void textBox5_Leave(System::Object^  sender, System::EventArgs^  e);
+private: System::Void textBox6_Leave(System::Object^  sender, System::EventArgs^  e);
+private: System::Void textBox7_Leave(System::Object^  sender, System::EventArgs^  e);
+private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e);
 };
 }
 

@@ -76,7 +76,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Macros</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -90,14 +90,13 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
-<a href="#pri-static-attribs">Static Private Attributes</a> &#124;
 <a href="class_client_creator-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">ClientCreator Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p>This object creates and sets up an client for the Vicon system.  
+<p>This class creates and sets up an client for the Vicon system.  
  <a href="class_client_creator.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="_client_creator_8h_source.html">ClientCreator.h</a>&gt;</code></p>
@@ -110,9 +109,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a0984d992922a6adee68428f2ac270e29"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_client_creator.html#a0984d992922a6adee68428f2ac270e29">~ClientCreator</a> ()</td></tr>
 <tr class="memdesc:a0984d992922a6adee68428f2ac270e29"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor.  <a href="#a0984d992922a6adee68428f2ac270e29">More...</a><br/></td></tr>
 <tr class="separator:a0984d992922a6adee68428f2ac270e29"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aedb84f255470358ffe9779c8113a5083"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_client_creator.html#aedb84f255470358ffe9779c8113a5083">getCoordinates</a> (std::string ObjectName, double &amp;<a class="el" href="_form1_8h.html#a1059b82f84827fc49ea81b12566b3cdb">X</a>, double &amp;<a class="el" href="_form1_8h.html#ac8d59bf77d5ef21e7c7a88b08f14c825">Y</a>, double &amp;Rz)</td></tr>
-<tr class="memdesc:aedb84f255470358ffe9779c8113a5083"><td class="mdescLeft">&#160;</td><td class="mdescRight">This funktion gets the coordinates of an object.  <a href="#aedb84f255470358ffe9779c8113a5083">More...</a><br/></td></tr>
-<tr class="separator:aedb84f255470358ffe9779c8113a5083"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2668307cd3a08c7b1924b00000bdc2ea"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_client_creator.html#a2668307cd3a08c7b1924b00000bdc2ea">getCoordinates</a> (std::string ObjectName, double *X, double *Y, double *Rz)</td></tr>
+<tr class="memdesc:a2668307cd3a08c7b1924b00000bdc2ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function gets the coordinates of an object.  <a href="#a2668307cd3a08c7b1924b00000bdc2ea">More...</a><br/></td></tr>
+<tr class="separator:a2668307cd3a08c7b1924b00000bdc2ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
@@ -128,15 +127,9 @@ Output_GetSegmentGlobalTranslation&#160;</td><td class="memItemRight" valign="bo
 Output_GetSegmentGlobalRotationEulerXYZ&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_client_creator.html#a4f2c3b7d4393668c2547e13cb4f02cfb">SegmentGlobalRotationEulerXYZ</a></td></tr>
 <tr class="memdesc:a4f2c3b7d4393668c2547e13cb4f02cfb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rotation. <br/></td></tr>
 <tr class="separator:a4f2c3b7d4393668c2547e13cb4f02cfb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-static-attribs"></a>
-Static Private Attributes</h2></td></tr>
-<tr class="memitem:a63f5d153483631aeba0118666f76178f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a63f5d153483631aeba0118666f76178f"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>TransmitMulticast</b></td></tr>
-<tr class="separator:a63f5d153483631aeba0118666f76178f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>This object creates and sets up an client for the Vicon system. </p>
+<div class="textblock"><p>This class creates and sets up an client for the Vicon system. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a3c33fca5584a78d903a072dc2c281b53"></a>
 <div class="memitem">
@@ -152,7 +145,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>TransmitMulticast</b>
 </div><div class="memdoc">
 
 <p>Constructor. </p>
-<p>The construktor creates a client for the Vicon tracker. </p>
+<p>The constructor creates a client for the Vicon tracker. </p>
 
 </div>
 </div>
@@ -170,12 +163,12 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>TransmitMulticast</b>
 </div><div class="memdoc">
 
 <p>Destructor. </p>
-<p>The destructor disconnects the client for the Vicon tracker. </p>
+<p>The destructor disconnects the client from the Vicon tracker. </p>
 
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="aedb84f255470358ffe9779c8113a5083"></a>
+<a class="anchor" id="a2668307cd3a08c7b1924b00000bdc2ea"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -188,19 +181,19 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>TransmitMulticast</b>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">double &amp;&#160;</td>
+          <td class="paramtype">double *&#160;</td>
           <td class="paramname"><em>X</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">double &amp;&#160;</td>
+          <td class="paramtype">double *&#160;</td>
           <td class="paramname"><em>Y</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">double &amp;&#160;</td>
+          <td class="paramtype">double *&#160;</td>
           <td class="paramname"><em>Rz</em>&#160;</td>
         </tr>
         <tr>
@@ -211,7 +204,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>TransmitMulticast</b>
       </table>
 </div><div class="memdoc">
 
-<p>This funktion gets the coordinates of an object. </p>
+<p>This function gets the coordinates of an object. </p>
 <p>The X- and Y-coordinates and the orientation of the object, which name is given by ObjectName, are stored in the variables X, Y and Rz. </p>
 
 </div>
@@ -222,7 +215,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>TransmitMulticast</b>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed May 15 2013 18:31:42 for RC_Cars by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Jun 20 2013 13:17:56 for RC_Cars by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.3.1
 </small></address>

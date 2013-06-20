@@ -103,7 +103,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -149,6 +149,7 @@ copy lib\ViconDataStreamSDK_CPP.dll $(IntDir)</Command>
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Windows.Forms.DataVisualization" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -164,6 +165,7 @@ copy lib\ViconDataStreamSDK_CPP.dll $(IntDir)</Command>
   <ItemGroup>
     <ClCompile Include="src\AssemblyInfo.cpp" />
     <ClCompile Include="src\ClientCreator.cpp" />
+    <ClCompile Include="src\Form1.cpp" />
     <ClCompile Include="src\PID_Controller.cpp" />
     <ClCompile Include="src\RC_Cars.cpp" />
     <ClCompile Include="src\SerialClass.cpp" />
@@ -177,6 +179,7 @@ copy lib\ViconDataStreamSDK_CPP.dll $(IntDir)</Command>
   <ItemGroup>
     <ClInclude Include="include\Client.h" />
     <ClInclude Include="include\ClientCreator.h" />
+    <ClInclude Include="include\constants.h" />
     <ClInclude Include="include\Form1.h">
       <FileType>CppForm</FileType>
     </ClInclude>
@@ -190,6 +193,11 @@ copy lib\ViconDataStreamSDK_CPP.dll $(IntDir)</Command>
   </ItemGroup>
   <ItemGroup>
     <Library Include="lib\ViconDataStreamSDK_CPP.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="include\Form1.resx">
+      <DependentUpon>Form1.h</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

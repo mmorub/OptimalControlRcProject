@@ -40,6 +40,9 @@
     <ClCompile Include="src\SerialClass.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="src\Form1.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\resource.h">
@@ -63,6 +66,9 @@
     <ClInclude Include="include\Form1.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="include\constants.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="app.rc">
@@ -70,11 +76,11 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Form1.resX">
-      <Filter>Ressourcendateien</Filter>
-    </EmbeddedResource>
+    <Library Include="lib\ViconDataStreamSDK_CPP.lib" />
   </ItemGroup>
   <ItemGroup>
-    <Library Include="lib\ViconDataStreamSDK_CPP.lib" />
+    <EmbeddedResource Include="include\Form1.resx">
+      <Filter>Ressourcendateien</Filter>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>
