@@ -27,3 +27,5 @@ kyosho - vendor of mini-z and dnano toy rc cars etc.
 mini-z - type of toy rc car, scale is about 1:25  
 pairing - see binding
 rc - short for remote-control, remote-controlled etc.
+
+Hallo Welt.
